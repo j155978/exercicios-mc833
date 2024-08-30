@@ -27,12 +27,25 @@ int main (int argc, char **argv) {
     bzero(&servaddr, sizeof(servaddr));
     servaddr.sin_family      = AF_INET;
     servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    servaddr.sin_port        = htons(13);   
+    // servaddr.sin_port        = htons(4950);   
 
     if (bind(listenfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) == -1) {
         perror("bind");
         exit(1);
     }
+
+    // Exercício 4
+    socklen_t len = sizeof(servaddr);
+    if (getsockname(listenfd, (struct sockaddr *)&servaddr, &len) == -1) {
+        perror("getsockname");
+        exit(1);
+    }
+
+    unsigned int port;
+    port = ntohs(servaddr.sin_port);
+    printf("Port number: %d\n", port);
+    // end of changes
+
 
     if (listen(listenfd, LISTENQ) == -1) {
         perror("listen");
@@ -44,7 +57,7 @@ int main (int argc, char **argv) {
         perror("accept");
         exit(1);
         }
-
+    
         ticks = time(NULL);
         snprintf(buf, sizeof(buf), "Hello from server!\nTime: %.24s\r\n", ctime(&ticks));
         write(connfd, buf, strlen(buf));
