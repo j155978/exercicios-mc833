@@ -16,6 +16,7 @@ int main(int argc, char **argv) {
     int    sockfd, n;
     char   recvline[MAXLINE + 1];
     char   error[MAXLINE + 1];
+    char   messagebuffer[MAXLINE + 1]; //buffer para envio da mensagem
     struct sockaddr_in servaddr;
 
 
@@ -65,8 +66,17 @@ int main(int argc, char **argv) {
 
     printf("Informações do socket local:\n");
     printf("IP: %s\n", ip_str);
-    printf("Porta: %d\n", ntohs(local_addr.sin_port));
+    printf("Porta: %d\n\n", ntohs(local_addr.sin_port));
     //
+
+    //Exercicio 7, envio de mensagem para o servidor
+
+    printf("Digite a mensagem a ser enviada: ");
+    if (fgets(messagebuffer, MAXLINE, stdin) != NULL){
+        write(sockfd, messagebuffer, strlen(messagebuffer));
+    }
+
+    // end of exercicio 7
 
     while ( (n = read(sockfd, recvline, MAXLINE)) > 0) {
         recvline[n] = 0;

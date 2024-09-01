@@ -8,14 +8,17 @@
 #include <sys/socket.h>
 #include <time.h>
 #include <unistd.h>
+#include <arpa/inet.h>
 
 #define LISTENQ 10
 #define MAXDATASIZE 100
 
 int main (int argc, char **argv) {
     int    listenfd, connfd;
-    struct sockaddr_in servaddr;
+    // added clientaddr for exercicio 6
+    struct sockaddr_in servaddr, clientaddr;
     char   buf[MAXDATASIZE];
+
     time_t ticks;
 
 
@@ -57,7 +60,44 @@ int main (int argc, char **argv) {
         perror("accept");
         exit(1);
         }
-    
+
+        //Exercício 6
+
+        len = sizeof(clientaddr);
+        if (getpeername(connfd, (struct sockaddr *)&clientaddr, &len) == -1){
+            perror("getpeername");
+            exit(1);
+        }
+
+        char ipCliente[INET_ADDRSTRLEN];
+
+        inet_ntop(AF_INET, &(clientaddr.sin_addr), ipCliente, sizeof(ipCliente));
+
+        unsigned int portaCliente = ntohs(clientaddr.sin_port);
+
+        printf("Cliente conectado: \n");
+        printf("IP: %s\n", ipCliente);
+        printf("Porta: %d\n\n", portaCliente);
+
+        fflush(stdin);
+
+        //End of exercicio 6
+
+        //Exercicio 7 - impressão da mensagem enviada pelo cliente
+
+        int n;
+        while ( (n = read(connfd, buf, MAXDATASIZE-1)) > 0) {
+            buf[n] = 0;
+            printf("Mensagem recebida do cliente:\n");
+            if (fputs(buf, stdout) == EOF) {
+                perror("fputs error");
+                exit(1);
+            }
+            break;
+
+        // end of exercicio 7
+        }
+
         ticks = time(NULL);
         snprintf(buf, sizeof(buf), "Hello from server!\nTime: %.24s\r\n", ctime(&ticks));
         write(connfd, buf, strlen(buf));
