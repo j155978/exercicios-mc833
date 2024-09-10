@@ -86,6 +86,10 @@ int main(int argc, char **argv) {
     fflush(stdin);
     sleep(5);
 
+    char* mensagem = "Acabei :)";
+
+    write(sockfd, mensagem, strlen(mensagem));
+
     if (n < 0) {
         perror("read error");
         exit(1);

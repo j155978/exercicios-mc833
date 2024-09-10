@@ -69,6 +69,18 @@ int main (int argc, char **argv) {
             write(connfd, buf, strlen(buf));
 
 
+            int n;
+            while ( (n = read(connfd, buf, MAXDATASIZE-1)) > 0) {
+                buf[n] = 0;
+                printf("Mensagem recebida do cliente:\n");
+                if (fputs(buf, stdout) == EOF) {
+                    perror("fputs error");
+                    exit(1);
+                }
+                break;
+            }
+
+
             close(connfd);
 
             printf("Fechando filho!\n");
