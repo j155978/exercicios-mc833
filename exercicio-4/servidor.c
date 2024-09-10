@@ -15,13 +15,13 @@
 
 int main (int argc, char **argv) {
     int    listenfd, connfd;
-    // added clientaddr for exercicio 6
-    struct sockaddr_in servaddr, clientaddr;
+    struct sockaddr_in servaddr;
     char   buf[MAXDATASIZE];
 
+    int teste = 0;
     time_t ticks;
 
-
+    
     if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
         perror("socket");
         exit(1);
@@ -39,17 +39,15 @@ int main (int argc, char **argv) {
         exit(1);
     }
 
-    // Exercício 4
     socklen_t len = sizeof(servaddr);
     if (getsockname(listenfd, (struct sockaddr *)&servaddr, &len) == -1) {
         perror("getsockname");
         exit(1);
     }
 
-    unsigned int port;
-    port = ntohs(servaddr.sin_port);
-    printf("Port number: %d\n", port);
-    // end of changes
+    // unsigned int port;
+    // port = ntohs(servaddr.sin_port);
+    // printf("Port number: %d\n", port);
 
 
     if (listen(listenfd, LISTENQ) == -1) {
@@ -58,32 +56,28 @@ int main (int argc, char **argv) {
     }
 
     for ( ; ; ) {
-      if ((connfd = accept(listenfd, (struct sockaddr *) NULL, NULL)) == -1 ) {
-        perror("accept");
-        exit(1);
-        }
-
-        //Exercício 6
-
-        len = sizeof(clientaddr);
-        if (getpeername(connfd, (struct sockaddr *)&clientaddr, &len) == -1){
-            perror("getpeername");
+      
+        if ((connfd = accept(listenfd, (struct sockaddr *) NULL, NULL)) == -1 ) {
+            perror("accept");
             exit(1);
         }
 
-        char ipCliente[INET_ADDRSTRLEN];
+        pid_t pid = fork();
 
-        inet_ntop(AF_INET, &(clientaddr.sin_addr), ipCliente, sizeof(ipCliente));
-
-        unsigned int portaCliente = ntohs(clientaddr.sin_port);
-
-        printf("Cliente conectado: \n");
-        printf("IP: %s\n", ipCliente);
-        printf("Porta: %d\n\n", portaCliente);
-
-        fflush(stdin);
-
-        //End of exercicio 6
+        if (pid < 0) {
+            perror("fork");
+        }
+        if (pid == 0) {
+            // ChildProcess();
+            close(listenfd);
+        }
+        else {
+            // ParentProcess();
+            close(connfd);
+            printf("connections: %d\n", teste);
+            fflush(stdin);
+            teste += 1;
+        }
 
         //Exercicio 7 - impressão da mensagem enviada pelo cliente
 
