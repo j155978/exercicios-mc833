@@ -19,8 +19,8 @@ int main (int argc, char **argv) {
     char   buf[MAXDATASIZE];
 
     int teste = 0;
-    time_t ticks;
 
+    char *TAREFAS[] = {"LIMPEZA", "COZINHA", "ESTUDOS", "LOUÇA", "COMPRAS"};
     
     if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
         perror("socket");
@@ -44,17 +44,12 @@ int main (int argc, char **argv) {
         perror("getsockname");
         exit(1);
     }
-
-    // unsigned int port;
-    // port = ntohs(servaddr.sin_port);
-    // printf("Port number: %d\n", port);
-
-
+    
     if (listen(listenfd, LISTENQ) == -1) {
         perror("listen");
         exit(1);
     }
-
+    
     for ( ; ; ) {
       
         if ((connfd = accept(listenfd, (struct sockaddr *) NULL, NULL)) == -1 ) {
@@ -70,36 +65,22 @@ int main (int argc, char **argv) {
         if (pid == 0) {
             // ChildProcess();
             close(listenfd);
+            snprintf(buf, sizeof(buf), TAREFAS[teste]);
+            write(connfd, buf, strlen(buf));
+
+
+            close(connfd);
+
+            printf("Fechando filho!\n");
+            exit(0);
         }
         else {
-            // ParentProcess();
+            //ParentProcess();
             close(connfd);
-            printf("connections: %d\n", teste);
+            printf("Finalizando conexão no pai\n");
             fflush(stdin);
             teste += 1;
         }
-
-        //Exercicio 7 - impressão da mensagem enviada pelo cliente
-
-        int n;
-        while ( (n = read(connfd, buf, MAXDATASIZE-1)) > 0) {
-            buf[n] = 0;
-            printf("Mensagem recebida do cliente:\n");
-            if (fputs(buf, stdout) == EOF) {
-                perror("fputs error");
-                exit(1);
-            }
-            break;
-
-        // end of exercicio 7
-        }
-
-        ticks = time(NULL);
-        snprintf(buf, sizeof(buf), "Hello from server!\nTime: %.24s\r\n", ctime(&ticks));
-        write(connfd, buf, strlen(buf));
-
-
-        close(connfd);
     }
     return(0);
 }

@@ -1,3 +1,4 @@
 # Ignorar arquivos sem extensão chamados "servidor" e "cliente"
 servidor
 cliente
+settings.json

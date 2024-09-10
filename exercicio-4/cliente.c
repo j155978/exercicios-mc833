@@ -16,11 +16,9 @@ int main(int argc, char **argv) {
     int    sockfd, n;
     char   recvline[MAXLINE + 1];
     char   error[MAXLINE + 1];
-    char   messagebuffer[MAXLINE + 1]; //buffer para envio da mensagem
     struct sockaddr_in servaddr;
 
 
-    // modificado
     if (argc != 3) {
         strcpy(error,"uso: ");
         strcat(error,argv[0]);
@@ -37,10 +35,8 @@ int main(int argc, char **argv) {
     bzero(&servaddr, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
     
-    // modificado
     int port_arg = atoi(argv[2]);
     servaddr.sin_port   = htons((unsigned int)port_arg);
-    // modificado
 
     if (inet_pton(AF_INET, argv[1], &servaddr.sin_addr) <= 0) {
         perror("inet_pton error");
@@ -52,7 +48,6 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    // Exercício 5
     struct sockaddr_in local_addr;
     socklen_t addr_len = sizeof(local_addr);
 
@@ -61,30 +56,35 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
+
     char ip_str[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &(servaddr.sin_addr), ip_str, sizeof(ip_str));
+
+    printf("Informações do servidor:\n");
+    printf("IP: %s\n", ip_str);
+    printf("Porta: %d\n\n\n", ntohs(servaddr.sin_port));
+
+
     inet_ntop(AF_INET, &(local_addr.sin_addr), ip_str, sizeof(ip_str));
 
     printf("Informações do socket local:\n");
     printf("IP: %s\n", ip_str);
     printf("Porta: %d\n\n", ntohs(local_addr.sin_port));
-    //
+    
 
-    //Exercicio 7, envio de mensagem para o servidor
-
-    printf("Digite a mensagem a ser enviada: ");
-    if (fgets(messagebuffer, MAXLINE, stdin) != NULL){
-        write(sockfd, messagebuffer, strlen(messagebuffer));
-    }
-
-    // end of exercicio 7
-
+    printf("Tarefa recebida:");
     while ( (n = read(sockfd, recvline, MAXLINE)) > 0) {
         recvline[n] = 0;
         if (fputs(recvline, stdout) == EOF) {
             perror("fputs error");
             exit(1);
         }
+        break;
     }
+    printf("\n");
+
+    fflush(stdin);
+    sleep(5);
 
     if (n < 0) {
         perror("read error");
