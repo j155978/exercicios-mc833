@@ -12,6 +12,15 @@
 
 #define MAXLINE 4096
 
+int Socket(int family, int type, int flags) {
+    int sockfd;
+    if ((sockfd = socket(family, type, flags)) < 0) {
+        perror("socket");
+        exit(1);
+    } else
+        return sockfd;
+}
+
 int main(int argc, char **argv) {
     int    sockfd, n;
     char   recvline[MAXLINE + 1];
@@ -27,10 +36,7 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    if ( (sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        perror("socket error");
-        exit(1);
-    }
+    sockfd = Socket(AF_INET, SOCK_STREAM, 0);
 
     bzero(&servaddr, sizeof(servaddr));
     servaddr.sin_family = AF_INET;

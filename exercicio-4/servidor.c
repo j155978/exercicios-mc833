@@ -13,6 +13,15 @@
 #define LISTENQ 10
 #define MAXDATASIZE 100
 
+int Socket(int family, int type, int flags) {
+    int sockfd;
+    if ((sockfd = socket(family, type, flags)) < 0) {
+        perror("socket");
+        exit(1);
+    } else
+        return sockfd;
+}
+
 int main (int argc, char **argv) {
     int    listenfd, connfd;
     struct sockaddr_in servaddr;
@@ -22,10 +31,7 @@ int main (int argc, char **argv) {
 
     char *TAREFAS[] = {"LIMPEZA", "COZINHA", "ESTUDOS", "LOUÇA", "COMPRAS"};
     
-    if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-        perror("socket");
-        exit(1);
-    }
+    listenfd = Socket(AF_INET, SOCK_STREAM, 0);
 
     bzero(&servaddr, sizeof(servaddr));
     servaddr.sin_family      = AF_INET;
@@ -72,7 +78,7 @@ int main (int argc, char **argv) {
             int n;
             while ( (n = read(connfd, buf, MAXDATASIZE-1)) > 0) {
                 buf[n] = 0;
-                printf("Mensagem recebida do cliente:\n");
+                printf("Cliente finalizado:\n");
                 if (fputs(buf, stdout) == EOF) {
                     perror("fputs error");
                     exit(1);
@@ -80,6 +86,23 @@ int main (int argc, char **argv) {
                 break;
             }
 
+
+            struct sockaddr_in client_addr;
+            socklen_t addrlen = sizeof(client_addr);
+            if (getpeername(connfd, (struct sockaddr *)&client_addr, &addrlen) < 0) {
+                perror("getpeername");
+                exit(1);
+            }
+
+            char ip_str_svr[INET_ADDRSTRLEN];
+            inet_ntop(AF_INET, &(servaddr.sin_addr), ip_str_svr, sizeof(ip_str_svr));
+
+            char ip_str_cli[INET_ADDRSTRLEN];
+            inet_ntop(AF_INET, &(client_addr.sin_addr), ip_str_cli, sizeof(ip_str_cli));
+            
+            printf("IP/porta servidor: %s/%d\n", ip_str_svr, ntohs(servaddr.sin_port));
+            printf("IP/porta cliente: %s/%d\n", ip_str_cli, ntohs(client_addr.sin_port));
+            printf("Fechando filho!\n");
 
             close(connfd);
 
