@@ -13,6 +13,13 @@
 #define LISTENQ 10
 #define MAXDATASIZE 100
 
+int GetRandomNumber(int n){
+    srand(time(NULL));
+
+    return rand() % (n);
+    
+}
+
 int Socket(int family, int type, int flags) {
     int sockfd;
     if ((sockfd = socket(family, type, flags)) < 0) {
@@ -27,9 +34,9 @@ int main (int argc, char **argv) {
     struct sockaddr_in servaddr;
     char   buf[MAXDATASIZE];
 
-    int teste = 0;
-
+    char arquivo[] = "logs.txt";
     char *TAREFAS[] = {"LIMPEZA", "COZINHA", "ESTUDOS", "LOUÇA", "COMPRAS"};
+    int qtdTarefas = 5;
     
     listenfd = Socket(AF_INET, SOCK_STREAM, 0);
 
@@ -71,21 +78,6 @@ int main (int argc, char **argv) {
         if (pid == 0) {
             // ChildProcess();
             close(listenfd);
-            snprintf(buf, sizeof(buf), TAREFAS[teste]);
-            write(connfd, buf, strlen(buf));
-
-
-            int n;
-            while ( (n = read(connfd, buf, MAXDATASIZE-1)) > 0) {
-                buf[n] = 0;
-                printf("Cliente finalizado:\n");
-                if (fputs(buf, stdout) == EOF) {
-                    perror("fputs error");
-                    exit(1);
-                }
-                break;
-            }
-
 
             struct sockaddr_in client_addr;
             socklen_t addrlen = sizeof(client_addr);
@@ -99,14 +91,63 @@ int main (int argc, char **argv) {
 
             char ip_str_cli[INET_ADDRSTRLEN];
             inet_ntop(AF_INET, &(client_addr.sin_addr), ip_str_cli, sizeof(ip_str_cli));
-            
-            printf("IP/porta servidor: %s/%d\n", ip_str_svr, ntohs(servaddr.sin_port));
-            printf("IP/porta cliente: %s/%d\n", ip_str_cli, ntohs(client_addr.sin_port));
+
+            FILE *logFile = fopen(arquivo, "a");
+
+            char logLine2[5000];
+            sprintf(logLine2, "Cliente conectado IP/porta cliente: %s/%d\n", ip_str_cli, ntohs(client_addr.sin_port));
+            fputs(logLine2, logFile);
+
+            fclose(logFile);
+
+            logFile = fopen(arquivo, "a");
+            char logLineTarefa[100];
+            printf("Enviando tarefa %s\n", TAREFAS[GetRandomNumber(qtdTarefas)]);
+            sprintf(logLineTarefa, "Enviando tarefa %s\n", TAREFAS[GetRandomNumber(qtdTarefas)]);
+
+            fputs(logLineTarefa, logFile);
+
+            fclose(logFile);
+
+
+            snprintf(buf, sizeof(buf), TAREFAS[GetRandomNumber(qtdTarefas)]);
+            write(connfd, buf, strlen(buf));
+
+
+            int n;
+            while ( (n = read(connfd, buf, MAXDATASIZE-1)) > 0) {
+                buf[n] = 0;
+                printf("Cliente finalizado:\n");
+                if (fputs(buf, stdout) == EOF) {
+                    perror("fputs error");
+                    exit(1);
+                }
+
+
+                snprintf(buf, sizeof(buf), TAREFAS[0]);
+                write(connfd, buf, strlen(buf));
+
+                logFile = fopen(arquivo, "a");
+
+                sprintf(logLine2, "%s\n", buf);
+                fputs(logLine2, logFile);
+
+                sprintf(logLine2, "Cliente finalizado IP/porta cliente: %s/%d\n", ip_str_cli, ntohs(client_addr.sin_port));
+                fputs(logLine2, logFile);
+
+                fclose(logFile);
+                break;
+            }
+
+
+
+
+            // printf("IP/porta servidor: %s/%d\n", ip_str_svr, ntohs(servaddr.sin_port));
+            // printf("IP/porta cliente: %s/%d\n", ip_str_cli, ntohs(client_addr.sin_port));
             printf("Fechando filho!\n");
 
             close(connfd);
 
-            printf("Fechando filho!\n");
             exit(0);
         }
         else {
@@ -114,7 +155,6 @@ int main (int argc, char **argv) {
             close(connfd);
             printf("Finalizando conexão no pai\n");
             fflush(stdin);
-            teste += 1;
         }
     }
     return(0);

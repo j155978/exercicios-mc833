@@ -76,29 +76,31 @@ int main(int argc, char **argv) {
     printf("Informações do socket local:\n");
     printf("IP: %s\n", ip_str);
     printf("Porta: %d\n\n", ntohs(local_addr.sin_port));
-    
 
-    printf("Tarefa recebida:");
-    while ( (n = read(sockfd, recvline, MAXLINE)) > 0) {
-        recvline[n] = 0;
-        if (fputs(recvline, stdout) == EOF) {
-            perror("fputs error");
-            exit(1);
+    for(;;){
+        while ( (n = read(sockfd, recvline, MAXLINE)) > 0) {
+            recvline[n] = 0;
+
+            break;
         }
-        break;
-    }
-    printf("\n");
 
-    fflush(stdin);
-    sleep(5);
+        char mensagem[5000];
 
-    char* mensagem = "Acabei :)";
 
-    write(sockfd, mensagem, strlen(mensagem));
+        if(strcmp(recvline, "") != 0){
+            sprintf(mensagem, "Tarefa recebida: %s\n", recvline);
+            printf("%s", mensagem);
 
-    if (n < 0) {
-        perror("read error");
-        exit(1);
+            //fflush(stdin);
+            //sleep(5);
+
+            sprintf(mensagem, "TAREFA_%s CONCLUIDA", recvline);
+
+
+            write(sockfd, mensagem, strlen(mensagem));
+        }
+
+        recvline[0] = '\0';
     }
 
     exit(0);
