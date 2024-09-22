@@ -75,7 +75,8 @@ int main(int argc, char **argv) {
 
     printf("Informações do socket local:\n");
     printf("IP: %s\n", ip_str);
-    printf("Porta: %d\n\n", ntohs(local_addr.sin_port));
+    int porta = ntohs(local_addr.sin_port);
+    printf("Porta: %d\n\n", porta);
 
     for(;;){
         while ( (n = read(sockfd, recvline, MAXLINE)) > 0) {
@@ -86,15 +87,20 @@ int main(int argc, char **argv) {
 
         char mensagem[5000];
 
+        if(strcmp(recvline, "ENCERRAR") == 0){
+            printf("Recebido comando 'ENCERRAR', finalizando cliente\n");
+            fflush(stdin);
+            break;
+        }
 
         if(strcmp(recvline, "") != 0){
             sprintf(mensagem, "Tarefa recebida: %s\n", recvline);
             printf("%s", mensagem);
 
-            //fflush(stdin);
-            //sleep(5);
+            fflush(stdin);
+            sleep(3);
 
-            sprintf(mensagem, "TAREFA_%s CONCLUIDA", recvline);
+            sprintf(mensagem, "TAREFA_%s CONCLUIDA por %s / %d\n", recvline, ip_str, porta);
 
 
             write(sockfd, mensagem, strlen(mensagem));
