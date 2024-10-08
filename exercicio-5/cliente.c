@@ -102,17 +102,17 @@ int main(int argc, char **argv) {
 
     char ip_str[INET_ADDRSTRLEN];
     inet_ntop(AF_INET, &(servaddr.sin_addr), ip_str, sizeof(ip_str));
-    printf("Informações do servidor:\n");
-    printf("IP: %s\n", ip_str);
-    printf("Porta: %d\n\n\n", ntohs(servaddr.sin_port));
+    // printf("Informações do servidor:\n");
+    // printf("IP: %s\n", ip_str);
+    // printf("Porta: %d\n\n\n", ntohs(servaddr.sin_port));
 
     inet_ntop(AF_INET, &(local_addr.sin_addr), ip_str, sizeof(ip_str));
-    printf("Informações do socket local:\n");
-    printf("IP: %s\n", ip_str);
+    // printf("Informações do socket local:\n");
+    printf("clientId %d Conectado. IP: %s ", clientId, ip_str);
     int porta = ntohs(local_addr.sin_port);
-    printf("Porta: %d\n\n", porta);
+    printf("Porta: %d\n", porta);
     
-    sleep(5);
+    sleep(2);
 
     while ( (n = read(sockfd, recvline, MAXLINE)) > 0) {
         recvline[n] = 0;

@@ -10,6 +10,8 @@
 #include <time.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <sys/wait.h>
+#include <signal.h>
 
 #define LISTENQ 10
 #define MAXDATASIZE 100
@@ -89,11 +91,26 @@ int Accept(int listenfd, struct sockaddr *__restrict__ __addr, socklen_t *__rest
     return connfd;
 }
 
-int main (int argc, char **argv) {
+// Função de tratamento para o sinal SIGCHLD
+void sigchld_handler(int signo) {
+    // Coleta todos os processos filhos que terminaram
+    while (waitpid(-1, NULL, WNOHANG) > 0);
+}
 
-    int    listenfd, connfd;
+int main (int argc, char **argv) {
+    // Configura o manipulador para o sinal SIGCHLD
+    struct sigaction sa;
+    sa.sa_handler = sigchld_handler;  // Define a função de tratamento
+    sigemptyset(&sa.sa_mask);         // Limpa o conjunto de sinais a serem bloqueados
+    sa.sa_flags = SA_RESTART;         // Reinicia chamadas de sistema interrompidas pelo sinal
+    if (sigaction(SIGCHLD, &sa, NULL) == -1) {
+        perror("sigaction");
+        exit(1);
+    }
+
+    int listenfd, connfd;
     struct sockaddr_in servaddr;
-    char   buf[MAXDATASIZE];
+    // char buf[MAXDATASIZE];
     listenfd = Socket(AF_INET, SOCK_STREAM, 0);
 
     // Configuração do endereço do servidor
@@ -101,46 +118,34 @@ int main (int argc, char **argv) {
     servaddr.sin_family      = AF_INET;
     servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    // Conversão da porta passada como argumento
     int port_arg = atoi(argv[1]);
-
     int backlog = atoi(argv[2]);
-
     servaddr.sin_port        = htons((unsigned int)port_arg);
 
     Bind(listenfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
 
     socklen_t len = sizeof(servaddr);
-    // Obtém informações do socket
     Getsockname(listenfd, (struct sockaddr *)&servaddr, &len);
 
-    // Coloca o socket em modo de escuta
     Listen(listenfd, backlog);
 
     // Loop principal para aceitar conexões
     for ( ; ; ) {
- 
-        // Aceita uma nova conexão
         connfd = Accept(listenfd, (struct sockaddr *) NULL, NULL);
+        sleep(3);
         
-        // Cria um processo filho para lidar com o cliente
         pid_t pid = fork(); 
 
         if (pid < 0) {
             perror("fork");
         }
         if (pid == 0) {
-            // Processo filho
-
-            // Inicializa a semente para gerar números aleatórios
             srand(time(NULL));
-            // Fecha o socket de escuta no processo filho
             close(listenfd); 
 
             struct sockaddr_in client_addr;
             socklen_t addrlen = sizeof(client_addr);
 
-            // Obtém informações do cliente
             Getpeername(connfd, (struct sockaddr *)&client_addr, &addrlen);
 
             char ip_str_svr[INET_ADDRSTRLEN];
@@ -149,7 +154,6 @@ int main (int argc, char **argv) {
             char ip_str_cli[INET_ADDRSTRLEN];
             inet_ntop(AF_INET, &(client_addr.sin_addr), ip_str_cli, sizeof(ip_str_cli));
 
-            // Exibe a data e hora formatadas
             char hora[50];
             GetCurrentTime(hora, sizeof(hora));
             FILE *logFile = fopen(arquivo, "a");
@@ -159,22 +163,19 @@ int main (int argc, char **argv) {
             fputs(logLine2, logFile);
             fclose(logFile);
 
+            // snprintf(buf, sizeof(buf), "Fim\n");
+            // write(connfd, buf, strlen(buf));
 
-            snprintf(buf, sizeof(buf), "Fim\n");
-            write(connfd, buf, strlen(buf));
-
-            // Log de desconexão do cliente
             logFile = fopen(arquivo, "a");
             sprintf(logLine2, "%s : Cliente finalizado IP/porta cliente: %s/%d\n", hora, ip_str_cli, ntohs(client_addr.sin_port));
             fputs(logLine2, logFile);
             fclose(logFile);
 
-            close(connfd);  // Fecha a conexão com o cliente
+            close(connfd);
             exit(0);
         } 
         else {
-            // Processo pai
-            close(connfd);  // Fecha o socket do cliente no processo pai
+            close(connfd);
             fflush(stdin);
         }
     }
