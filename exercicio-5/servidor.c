@@ -132,7 +132,7 @@ int main (int argc, char **argv) {
     // Loop principal para aceitar conexões
     for ( ; ; ) {
         connfd = Accept(listenfd, (struct sockaddr *) NULL, NULL);
-        sleep(3);
+        sleep(5);
         
         pid_t pid = fork(); 
 
@@ -166,12 +166,14 @@ int main (int argc, char **argv) {
             // snprintf(buf, sizeof(buf), "Fim\n");
             // write(connfd, buf, strlen(buf));
 
+            close(connfd);
+
             logFile = fopen(arquivo, "a");
             sprintf(logLine2, "%s : Cliente finalizado IP/porta cliente: %s/%d\n", hora, ip_str_cli, ntohs(client_addr.sin_port));
+            printf("%s", logLine2);
             fputs(logLine2, logFile);
             fclose(logFile);
-
-            close(connfd);
+            
             exit(0);
         } 
         else {
