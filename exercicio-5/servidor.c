@@ -98,15 +98,15 @@ void sigchld_handler(int signo) {
 }
 
 int main (int argc, char **argv) {
-    // Configura o manipulador para o sinal SIGCHLD
-    struct sigaction sa;
-    sa.sa_handler = sigchld_handler;  // Define a função de tratamento
-    sigemptyset(&sa.sa_mask);         // Limpa o conjunto de sinais a serem bloqueados
-    sa.sa_flags = SA_RESTART;         // Reinicia chamadas de sistema interrompidas pelo sinal
-    if (sigaction(SIGCHLD, &sa, NULL) == -1) {
-        perror("sigaction");
-        exit(1);
-    }
+    // // Configura o manipulador para o sinal SIGCHLD
+    // struct sigaction sa;
+    // sa.sa_handler = sigchld_handler;  // Define a função de tratamento
+    // sigemptyset(&sa.sa_mask);         // Limpa o conjunto de sinais a serem bloqueados
+    // sa.sa_flags = SA_RESTART;         // Reinicia chamadas de sistema interrompidas pelo sinal
+    // if (sigaction(SIGCHLD, &sa, NULL) == -1) {
+    //     perror("sigaction");
+    //     exit(1);
+    // }
 
     int listenfd, connfd;
     struct sockaddr_in servaddr;
@@ -128,6 +128,15 @@ int main (int argc, char **argv) {
     Getsockname(listenfd, (struct sockaddr *)&servaddr, &len);
 
     Listen(listenfd, backlog);
+
+    char hora[50];
+    GetCurrentTime(hora, sizeof(hora));
+    FILE *logFile = fopen(arquivo, "a");
+    char logLine2[5000];
+    sprintf(logLine2, "=========================\n%s: Servidor Aberto. Backlog: %d\n=========================\n", hora, backlog);
+    // printf("%s", logLine2);
+    fputs(logLine2, logFile);
+    fclose(logFile);
 
     // Loop principal para aceitar conexões
     for ( ; ; ) {
