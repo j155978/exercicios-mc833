@@ -80,21 +80,33 @@ void GetCurrentTime(char *hora, size_t tamanho) {
              tm_info->tm_sec, 
              tv.tv_usec / 1000); // Converte microsegundos para milissegundos
 }
+typedef void Sigfunc(int);
 
-// Envelopamento função Accept
-int Accept(int listenfd, struct sockaddr *__restrict__ __addr, socklen_t *__restrict__ __addr_len) {
-    int connfd;
-    if ((connfd = accept(listenfd, (struct sockaddr *) NULL, NULL)) == -1) {
-        perror("accept");
-        exit(1);
+Sigfunc * Signal(int signo, Sigfunc *func){
+    struct sigaction act, oact;
+    act.sa_handler = func;
+    sigemptyset (&act.sa_mask);
+    act.sa_flags = 0;
+    if(signo == SIGALRM){
+#ifdef SA_INTERRUPT
+        act.sa_flags |= SA_INTERRUPT;
+#endif
+    } else {
+#ifdef SA_RESTART
+        act.sa_flags |= SA_RESTART;
+#endif
     }
-    return connfd;
+    if (sigaction (signo, &act, &oact) < 0)
+        return (SIG_ERR);
+    return (oact.sa_handler);
 }
 
-// Função de tratamento para o sinal SIGCHLD
-void sigchld_handler(int signo) {
-    // Coleta todos os processos filhos que terminaram
-    while (waitpid(-1, NULL, WNOHANG) > 0);
+void sig_chld(int signo){
+    pid_t pid;
+    int stat;
+    while((pid = waitpid(-1, &stat, WNOHANG)) > 0)
+        printf("child %d terminated\n",pid);
+    return;
 }
 
 int main (int argc, char **argv) {
@@ -129,6 +141,8 @@ int main (int argc, char **argv) {
 
     Listen(listenfd, backlog);
 
+    Signal(SIGCHLD, sig_chld);
+
     char hora[50];
     GetCurrentTime(hora, sizeof(hora));
     FILE *logFile = fopen(arquivo, "a");
@@ -137,11 +151,21 @@ int main (int argc, char **argv) {
     // printf("%s", logLine2);
     fputs(logLine2, logFile);
     fclose(logFile);
+    struct sockaddr_in client_addr;
+    socklen_t addrlen = sizeof(client_addr);
 
     // Loop principal para aceitar conexões
     for ( ; ; ) {
-        connfd = Accept(listenfd, (struct sockaddr *) NULL, NULL);
-        sleep(5);
+        
+        if((connfd = accept(listenfd, (struct sockaddr *) &client_addr, &addrlen)) < 0){
+            if(errno == EINTR)
+                continue;
+            else
+                perror("accept_errro");
+        }
+
+        
+        sleep(1);
         
         pid_t pid = fork(); 
 
@@ -152,8 +176,6 @@ int main (int argc, char **argv) {
             srand(time(NULL));
             close(listenfd); 
 
-            struct sockaddr_in client_addr;
-            socklen_t addrlen = sizeof(client_addr);
 
             Getpeername(connfd, (struct sockaddr *)&client_addr, &addrlen);
 
