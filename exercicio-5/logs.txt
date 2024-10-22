@@ -1,0 +1,126 @@
+=========================
+2024-10-22 15:47:07.723: Servidor Aberto. Backlog: 0. 5 Conexões.
+=========================
+2024-10-22 15:47:29.350 : Cliente conectado IP/porta cliente: 127.0.0.1/35574
+2024-10-22 15:47:29.350 : Cliente finalizado IP/porta cliente: 127.0.0.1/35574
+2024-10-22 15:47:34.350 : Cliente conectado IP/porta cliente: 127.0.0.1/35580
+2024-10-22 15:47:34.350 : Cliente finalizado IP/porta cliente: 127.0.0.1/35580
+2024-10-22 15:47:39.351 : Cliente conectado IP/porta cliente: 127.0.0.1/35600
+2024-10-22 15:47:39.351 : Cliente finalizado IP/porta cliente: 127.0.0.1/35600
+=========================
+2024-10-22 15:49:54.208: Servidor Aberto. Backlog: 0. 12 Conexões.
+=========================
+2024-10-22 15:50:09.068 : Cliente conectado IP/porta cliente: 127.0.0.1/50486
+2024-10-22 15:50:09.068 : Cliente finalizado IP/porta cliente: 127.0.0.1/50486
+2024-10-22 15:50:14.068 : Cliente conectado IP/porta cliente: 127.0.0.1/50494
+2024-10-22 15:50:14.068 : Cliente finalizado IP/porta cliente: 127.0.0.1/50494
+2024-10-22 15:50:19.069 : Cliente conectado IP/porta cliente: 127.0.0.1/50554
+2024-10-22 15:50:19.069 : Cliente finalizado IP/porta cliente: 127.0.0.1/50554
+2024-10-22 15:50:24.069 : Cliente conectado IP/porta cliente: 127.0.0.1/50516
+2024-10-22 15:50:24.069 : Cliente finalizado IP/porta cliente: 127.0.0.1/50516
+2024-10-22 15:50:29.069 : Cliente conectado IP/porta cliente: 127.0.0.1/50556
+2024-10-22 15:50:29.069 : Cliente finalizado IP/porta cliente: 127.0.0.1/50556
+2024-10-22 15:50:34.069 : Cliente conectado IP/porta cliente: 127.0.0.1/50506
+2024-10-22 15:50:34.069 : Cliente finalizado IP/porta cliente: 127.0.0.1/50506
+2024-10-22 15:50:39.070 : Cliente conectado IP/porta cliente: 127.0.0.1/50574
+2024-10-22 15:50:39.070 : Cliente finalizado IP/porta cliente: 127.0.0.1/50574
+=========================
+2024-10-22 16:06:34.265: Servidor Aberto. Backlog: 6. 5 Conexões
+=========================
+2024-10-22 16:06:53.053 : Cliente conectado IP/porta cliente: 127.0.0.1/40808
+2024-10-22 16:06:53.053 : Cliente finalizado IP/porta cliente: 127.0.0.1/40808
+2024-10-22 16:06:58.054 : Cliente conectado IP/porta cliente: 127.0.0.1/40816
+2024-10-22 16:06:58.054 : Cliente finalizado IP/porta cliente: 127.0.0.1/40816
+2024-10-22 16:07:03.054 : Cliente conectado IP/porta cliente: 127.0.0.1/40832
+2024-10-22 16:07:03.054 : Cliente finalizado IP/porta cliente: 127.0.0.1/40832
+2024-10-22 16:07:08.054 : Cliente conectado IP/porta cliente: 127.0.0.1/40844
+2024-10-22 16:07:08.054 : Cliente finalizado IP/porta cliente: 127.0.0.1/40844
+2024-10-22 16:07:13.054 : Cliente conectado IP/porta cliente: 127.0.0.1/40848
+2024-10-22 16:07:13.054 : Cliente finalizado IP/porta cliente: 127.0.0.1/40848
+=========================
+2024-10-22 16:09:58.463: Servidor Aberto. Backlog: 6
+=========================
+=========================
+2024-10-22 16:11:31.522: Servidor Aberto. Backlog: 6. 9 Conexões
+=========================
+2024-10-22 16:11:40.565 : Cliente conectado IP/porta cliente: 127.0.0.1/34020
+2024-10-22 16:11:40.565 : Cliente finalizado IP/porta cliente: 127.0.0.1/34020
+2024-10-22 16:11:45.565 : Cliente conectado IP/porta cliente: 127.0.0.1/34026
+2024-10-22 16:11:45.565 : Cliente finalizado IP/porta cliente: 127.0.0.1/34026
+2024-10-22 16:11:50.566 : Cliente conectado IP/porta cliente: 127.0.0.1/34036
+2024-10-22 16:11:50.566 : Cliente finalizado IP/porta cliente: 127.0.0.1/34036
+2024-10-22 16:11:55.566 : Cliente conectado IP/porta cliente: 127.0.0.1/34040
+2024-10-22 16:11:55.566 : Cliente finalizado IP/porta cliente: 127.0.0.1/34040
+2024-10-22 16:12:00.566 : Cliente conectado IP/porta cliente: 127.0.0.1/34042
+2024-10-22 16:12:00.566 : Cliente finalizado IP/porta cliente: 127.0.0.1/34042
+2024-10-22 16:12:05.566 : Cliente conectado IP/porta cliente: 127.0.0.1/34056
+2024-10-22 16:12:05.566 : Cliente finalizado IP/porta cliente: 127.0.0.1/34056
+2024-10-22 16:12:10.567 : Cliente conectado IP/porta cliente: 127.0.0.1/34060
+2024-10-22 16:12:10.567 : Cliente finalizado IP/porta cliente: 127.0.0.1/34060
+2024-10-22 16:12:15.567 : Cliente conectado IP/porta cliente: 127.0.0.1/34066
+2024-10-22 16:12:15.567 : Cliente finalizado IP/porta cliente: 127.0.0.1/34066
+2024-10-22 16:12:20.567 : Cliente conectado IP/porta cliente: 127.0.0.1/34080
+2024-10-22 16:12:20.567 : Cliente finalizado IP/porta cliente: 127.0.0.1/34080
+=========================
+2024-10-22 16:14:16.623: Servidor Aberto. Backlog: 6. 15 Conexões
+=========================
+2024-10-22 16:15:07.052 : Cliente conectado IP/porta cliente: 127.0.0.1/60622
+2024-10-22 16:15:07.052 : Cliente finalizado IP/porta cliente: 127.0.0.1/60622
+2024-10-22 16:15:12.052 : Cliente conectado IP/porta cliente: 127.0.0.1/60634
+2024-10-22 16:15:12.052 : Cliente finalizado IP/porta cliente: 127.0.0.1/60634
+2024-10-22 16:15:17.053 : Cliente conectado IP/porta cliente: 127.0.0.1/60644
+2024-10-22 16:15:17.053 : Cliente finalizado IP/porta cliente: 127.0.0.1/60644
+2024-10-22 16:15:22.053 : Cliente conectado IP/porta cliente: 127.0.0.1/60642
+2024-10-22 16:15:22.053 : Cliente finalizado IP/porta cliente: 127.0.0.1/60642
+2024-10-22 16:15:27.053 : Cliente conectado IP/porta cliente: 127.0.0.1/60650
+2024-10-22 16:15:27.053 : Cliente finalizado IP/porta cliente: 127.0.0.1/60650
+2024-10-22 16:15:32.054 : Cliente conectado IP/porta cliente: 127.0.0.1/60660
+2024-10-22 16:15:32.054 : Cliente finalizado IP/porta cliente: 127.0.0.1/60660
+2024-10-22 16:15:37.054 : Cliente conectado IP/porta cliente: 127.0.0.1/60676
+2024-10-22 16:15:37.054 : Cliente finalizado IP/porta cliente: 127.0.0.1/60676
+2024-10-22 16:15:42.054 : Cliente conectado IP/porta cliente: 127.0.0.1/60678
+2024-10-22 16:15:42.054 : Cliente finalizado IP/porta cliente: 127.0.0.1/60678
+2024-10-22 16:15:47.054 : Cliente conectado IP/porta cliente: 127.0.0.1/60716
+2024-10-22 16:15:47.054 : Cliente finalizado IP/porta cliente: 127.0.0.1/60716
+2024-10-22 16:15:52.055 : Cliente conectado IP/porta cliente: 127.0.0.1/60734
+2024-10-22 16:15:52.055 : Cliente finalizado IP/porta cliente: 127.0.0.1/60734
+2024-10-22 16:15:57.055 : Cliente conectado IP/porta cliente: 127.0.0.1/60704
+2024-10-22 16:15:57.055 : Cliente finalizado IP/porta cliente: 127.0.0.1/60704
+2024-10-22 16:16:02.055 : Cliente conectado IP/porta cliente: 127.0.0.1/60718
+2024-10-22 16:16:02.055 : Cliente finalizado IP/porta cliente: 127.0.0.1/60718
+2024-10-22 16:16:07.055 : Cliente conectado IP/porta cliente: 127.0.0.1/60750
+2024-10-22 16:16:07.055 : Cliente finalizado IP/porta cliente: 127.0.0.1/60750
+=========================
+2024-10-22 16:24:11.330: Servidor Aberto. Backlog: 12. 15 Conexões
+=========================
+2024-10-22 16:24:24.766 : Cliente conectado IP/porta cliente: 127.0.0.1/35986
+2024-10-22 16:24:24.766 : Cliente finalizado IP/porta cliente: 127.0.0.1/35986
+2024-10-22 16:24:29.766 : Cliente conectado IP/porta cliente: 127.0.0.1/35990
+2024-10-22 16:24:29.766 : Cliente finalizado IP/porta cliente: 127.0.0.1/35990
+2024-10-22 16:24:34.767 : Cliente conectado IP/porta cliente: 127.0.0.1/35996
+2024-10-22 16:24:34.767 : Cliente finalizado IP/porta cliente: 127.0.0.1/35996
+2024-10-22 16:24:39.767 : Cliente conectado IP/porta cliente: 127.0.0.1/35998
+2024-10-22 16:24:39.767 : Cliente finalizado IP/porta cliente: 127.0.0.1/35998
+2024-10-22 16:24:44.767 : Cliente conectado IP/porta cliente: 127.0.0.1/36020
+2024-10-22 16:24:44.767 : Cliente finalizado IP/porta cliente: 127.0.0.1/36020
+2024-10-22 16:24:49.768 : Cliente conectado IP/porta cliente: 127.0.0.1/36026
+2024-10-22 16:24:49.768 : Cliente finalizado IP/porta cliente: 127.0.0.1/36026
+2024-10-22 16:24:54.768 : Cliente conectado IP/porta cliente: 127.0.0.1/36040
+2024-10-22 16:24:54.768 : Cliente finalizado IP/porta cliente: 127.0.0.1/36040
+2024-10-22 16:24:59.768 : Cliente conectado IP/porta cliente: 127.0.0.1/36052
+2024-10-22 16:24:59.768 : Cliente finalizado IP/porta cliente: 127.0.0.1/36052
+2024-10-22 16:25:04.768 : Cliente conectado IP/porta cliente: 127.0.0.1/36062
+2024-10-22 16:25:04.768 : Cliente finalizado IP/porta cliente: 127.0.0.1/36062
+2024-10-22 16:25:09.769 : Cliente conectado IP/porta cliente: 127.0.0.1/36066
+2024-10-22 16:25:09.769 : Cliente finalizado IP/porta cliente: 127.0.0.1/36066
+2024-10-22 16:25:14.769 : Cliente conectado IP/porta cliente: 127.0.0.1/36068
+2024-10-22 16:25:14.769 : Cliente finalizado IP/porta cliente: 127.0.0.1/36068
+2024-10-22 16:25:19.769 : Cliente conectado IP/porta cliente: 127.0.0.1/36078
+2024-10-22 16:25:19.769 : Cliente finalizado IP/porta cliente: 127.0.0.1/36078
+2024-10-22 16:25:24.770 : Cliente conectado IP/porta cliente: 127.0.0.1/36088
+2024-10-22 16:25:24.770 : Cliente finalizado IP/porta cliente: 127.0.0.1/36088
+2024-10-22 16:25:29.770 : Cliente conectado IP/porta cliente: 127.0.0.1/36096
+2024-10-22 16:25:29.770 : Cliente finalizado IP/porta cliente: 127.0.0.1/36096
+2024-10-22 16:25:34.770 : Cliente conectado IP/porta cliente: 127.0.0.1/36104
+2024-10-22 16:25:34.770 : Cliente finalizado IP/porta cliente: 127.0.0.1/36104
+

@@ -1,0 +1,141 @@
+5 Conexões. backlog = 0
+
+2024-10-22 15:47:24.350 : Tentando conexão clienteId 1
+2024-10-22 15:47:24.350 : Tentando conexão clienteId 3
+2024-10-22 15:47:24.350 : Tentando conexão clienteId 2
+2024-10-22 15:47:24.350 : Tentando conexão clienteId 4
+2024-10-22 15:47:24.350 : Tentando conexão clienteId 5
+2024-10-22 15:47:29.351 : clienteId 1 Finalizando!
+2024-10-22 15:47:34.351 : clienteId 3 Finalizando!
+2024-10-22 15:47:39.352 : clienteId 4 Finalizando!
+
+===========================================
+
+12 Conexões. backlog = 0
+
+2024-10-22 15:50:04.067 : Tentando conexão clienteId 2
+2024-10-22 15:50:04.067 : Tentando conexão clienteId 1
+2024-10-22 15:50:04.067 : Tentando conexão clienteId 3
+2024-10-22 15:50:04.067 : Tentando conexão clienteId 5
+2024-10-22 15:50:04.067 : Tentando conexão clienteId 4
+2024-10-22 15:50:04.067 : Tentando conexão clienteId 6
+2024-10-22 15:50:04.068 : Tentando conexão clienteId 7
+2024-10-22 15:50:04.068 : Tentando conexão clienteId 8
+2024-10-22 15:50:04.068 : Tentando conexão clienteId 11
+2024-10-22 15:50:04.068 : Tentando conexão clienteId 9
+2024-10-22 15:50:04.068 : Tentando conexão clienteId 10
+2024-10-22 15:50:04.068 : Tentando conexão clienteId 12
+2024-10-22 15:50:09.069 : clienteId 2 Finalizando!
+2024-10-22 15:50:14.069 : clienteId 1 Finalizando!
+2024-10-22 15:50:19.069 : clienteId 9 Finalizando!
+2024-10-22 15:50:24.069 : clienteId 5 Finalizando!
+2024-10-22 15:50:29.069 : clienteId 11 Finalizando!
+2024-10-22 15:50:34.070 : clienteId 3 Finalizando!
+2024-10-22 15:50:39.071 : clienteId 10 Finalizando!
+
+===========================================
+
+5 Conexões. backlog = 6
+
+2024-10-22 16:06:48.053 : Tentando conexão clienteId 1
+2024-10-22 16:06:48.053 : Tentando conexão clienteId 3
+2024-10-22 16:06:48.053 : Tentando conexão clienteId 2
+2024-10-22 16:06:48.053 : Tentando conexão clienteId 4
+2024-10-22 16:06:48.053 : Tentando conexão clienteId 5
+2024-10-22 16:06:53.054 : clienteId 1 Finalizando!
+2024-10-22 16:06:58.054 : clienteId 3 Finalizando!
+2024-10-22 16:07:03.056 : clienteId 2 Finalizando!
+2024-10-22 16:07:08.055 : clienteId 4 Finalizando!
+2024-10-22 16:07:13.055 : clienteId 5 Finalizando!
+
+===========================================
+
+9 Conexões. backlog = 6
+
+2024-10-22 16:11:35.564 : Tentando conexão clienteId 1
+2024-10-22 16:11:35.564 : Tentando conexão clienteId 2
+2024-10-22 16:11:35.564 : Tentando conexão clienteId 3
+2024-10-22 16:11:35.564 : Tentando conexão clienteId 4
+2024-10-22 16:11:35.565 : Tentando conexão clienteId 7
+2024-10-22 16:11:35.564 : Tentando conexão clienteId 5
+2024-10-22 16:11:35.565 : Tentando conexão clienteId 6
+2024-10-22 16:11:35.565 : Tentando conexão clienteId 8
+2024-10-22 16:11:35.565 : Tentando conexão clienteId 9
+2024-10-22 16:11:40.566 : clienteId 1 Finalizando!
+2024-10-22 16:11:45.566 : clienteId 2 Finalizando!
+2024-10-22 16:11:50.566 : clienteId 3 Finalizando!
+2024-10-22 16:11:55.567 : clienteId 7 Finalizando!
+2024-10-22 16:12:00.567 : clienteId 4 Finalizando!
+2024-10-22 16:12:05.567 : clienteId 5 Finalizando!
+2024-10-22 16:12:10.567 : clienteId 6 Finalizando!
+2024-10-22 16:12:15.568 : clienteId 8 Finalizando!
+2024-10-22 16:12:20.568 : clienteId 9 Finalizando!
+
+===========================================
+
+15 Conexões. backlog = 6
+
+2024-10-22 16:15:02.051 : Tentando conexão clienteId 1
+2024-10-22 16:15:02.051 : Tentando conexão clienteId 3
+2024-10-22 16:15:02.051 : Tentando conexão clienteId 2
+2024-10-22 16:15:02.051 : Tentando conexão clienteId 5
+2024-10-22 16:15:02.051 : Tentando conexão clienteId 4
+2024-10-22 16:15:02.051 : Tentando conexão clienteId 7
+2024-10-22 16:15:02.051 : Tentando conexão clienteId 6
+2024-10-22 16:15:02.052 : Tentando conexão clienteId 8
+2024-10-22 16:15:02.052 : Tentando conexão clienteId 10
+2024-10-22 16:15:02.052 : Tentando conexão clienteId 11
+2024-10-22 16:15:02.052 : Tentando conexão clienteId 13
+2024-10-22 16:15:02.052 : Tentando conexão clienteId 9
+2024-10-22 16:15:02.052 : Tentando conexão clienteId 14
+2024-10-22 16:15:02.052 : Tentando conexão clienteId 12
+2024-10-22 16:15:02.052 : Tentando conexão clienteId 15
+2024-10-22 16:15:07.053 : clienteId 1 Finalizando!
+2024-10-22 16:15:12.053 : clienteId 3 Finalizando!
+2024-10-22 16:15:17.053 : clienteId 5 Finalizando!
+2024-10-22 16:15:22.054 : clienteId 2 Finalizando!
+2024-10-22 16:15:27.054 : clienteId 4 Finalizando!
+2024-10-22 16:15:32.054 : clienteId 7 Finalizando!
+2024-10-22 16:15:37.055 : clienteId 6 Finalizando!
+2024-10-22 16:15:42.055 : clienteId 10 Finalizando!
+2024-10-22 16:15:47.055 : clienteId 14 Finalizando!
+2024-10-22 16:15:52.055 : clienteId 12 Finalizando!
+2024-10-22 16:15:57.055 : clienteId 13 Finalizando!
+2024-10-22 16:16:02.056 : clienteId 9 Finalizando!
+2024-10-22 16:16:07.056 : clienteId 15 Finalizando!
+
+===========================================
+
+15 Conexões. backlog = 12
+
+2024-10-22 16:24:19.765 : Tentando conexão clienteId 1
+2024-10-22 16:24:19.765 : Tentando conexão clienteId 2
+2024-10-22 16:24:19.765 : Tentando conexão clienteId 4
+2024-10-22 16:24:19.765 : Tentando conexão clienteId 3
+2024-10-22 16:24:19.765 : Tentando conexão clienteId 5
+2024-10-22 16:24:19.765 : Tentando conexão clienteId 7
+2024-10-22 16:24:19.765 : Tentando conexão clienteId 8
+2024-10-22 16:24:19.765 : Tentando conexão clienteId 6
+2024-10-22 16:24:19.766 : Tentando conexão clienteId 9
+2024-10-22 16:24:19.766 : Tentando conexão clienteId 10
+2024-10-22 16:24:19.766 : Tentando conexão clienteId 11
+2024-10-22 16:24:19.766 : Tentando conexão clienteId 13
+2024-10-22 16:24:19.766 : Tentando conexão clienteId 12
+2024-10-22 16:24:19.766 : Tentando conexão clienteId 15
+2024-10-22 16:24:19.766 : Tentando conexão clienteId 14
+2024-10-22 16:24:24.767 : clienteId 1 Finalizando!
+2024-10-22 16:24:29.767 : clienteId 2 Finalizando!
+2024-10-22 16:24:34.767 : clienteId 3 Finalizando!
+2024-10-22 16:24:39.768 : clienteId 4 Finalizando!
+2024-10-22 16:24:44.768 : clienteId 5 Finalizando!
+2024-10-22 16:24:49.769 : clienteId 7 Finalizando!
+2024-10-22 16:24:54.769 : clienteId 8 Finalizando!
+2024-10-22 16:24:59.769 : clienteId 6 Finalizando!
+2024-10-22 16:25:04.769 : clienteId 9 Finalizando!
+2024-10-22 16:25:09.769 : clienteId 10 Finalizando!
+2024-10-22 16:25:14.770 : clienteId 11 Finalizando!
+2024-10-22 16:25:19.770 : clienteId 13 Finalizando!
+2024-10-22 16:25:24.770 : clienteId 15 Finalizando!
+2024-10-22 16:25:29.771 : clienteId 12 Finalizando!
+2024-10-22 16:25:34.771 : clienteId 14 Finalizando!
+

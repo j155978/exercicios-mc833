@@ -10,6 +10,8 @@ CONNECTIONS=$2
 # Executa o número especificado de instâncias do cliente
 for i in $(seq 1 $CONNECTIONS)
 do
+    # Introduz um pequeno atraso aleatório (até .1 segundo) entre as conexões
+    sleep $((RANDOM % 1000))5e-4
     ./cliente 0.0.0.0 "$PORT" "$i" &
 done
 
