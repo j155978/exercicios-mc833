@@ -9,9 +9,78 @@
 #include <time.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <sys/time.h>
+
 
 #define LISTENQ 10
-#define MAXDATASIZE 100
+#define MAXDATASIZE 500
+
+// Função que retorna um número aleatório de 0 até n-1
+int GetRandomNumber(int n) {
+    return rand() % n;
+}
+
+// Função para criar um socket e verificar erros
+int Socket(int family, int type, int flags) {
+    int sockfd;
+    if ((sockfd = socket(family, type, flags)) < 0) {
+        perror("socket");
+        exit(1);
+    }
+    return sockfd;
+}
+
+// Envelopamento função Getpeername
+void Getpeername(int connfd, struct sockaddr *__restrict__ client_addr, socklen_t *__restrict__ addrlen) {
+    if (getpeername(connfd, client_addr, addrlen) < 0) {
+        perror("getpeername");
+        exit(1);
+    }
+}
+
+// Envelopamento função Bind
+void Bind(int listenfd, const struct sockaddr *servaddr, socklen_t __len) {
+    if (bind(listenfd, servaddr, __len) == -1) {
+        perror("bind");
+        exit(1);
+    }
+}
+
+// Envelopamento função Getsockname
+void Getsockname(int listenfd, struct sockaddr *__restrict__ servaddr, socklen_t *__restrict__ len) {
+    if (getsockname(listenfd, servaddr, len) == -1) {
+        perror("getsockname");
+        exit(1);
+    }
+}
+
+// Envelopamento função Accept
+int Accept(int listenfd, struct sockaddr *__restrict__ __addr, socklen_t *__restrict__ __addr_len) {
+    int connfd;
+    if ((connfd = accept(listenfd, (struct sockaddr *) NULL, NULL)) == -1) {
+        perror("accept");
+        exit(1);
+    }
+    return connfd;
+}
+
+void GetCurrentTime(char *hora, size_t tamanho) {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+
+    // Converte o tempo para a estrutura tm
+    struct tm *tm_info = localtime(&tv.tv_sec);
+
+    // Formata a data e hora com milissegundos
+    snprintf(hora, tamanho, "%04d-%02d-%02d %02d:%02d:%02d.%03ld",
+             tm_info->tm_year + 1900, 
+             tm_info->tm_mon + 1, 
+             tm_info->tm_mday, 
+             tm_info->tm_hour, 
+             tm_info->tm_min, 
+             tm_info->tm_sec, 
+             tv.tv_usec / 1000); // Converte microsegundos para milissegundos
+}
 
 int main (int argc, char **argv) {
     int    listenfd, connfd;
@@ -22,33 +91,20 @@ int main (int argc, char **argv) {
     time_t ticks;
 
 
-    if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-        perror("socket");
-        exit(1);
-    }
+    listenfd = Socket(AF_INET, SOCK_STREAM, 0);
 
     bzero(&servaddr, sizeof(servaddr));
     servaddr.sin_family      = AF_INET;
     servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    // servaddr.sin_port        = htons(4950);   
 
-    if (bind(listenfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) == -1) {
-        perror("bind");
-        exit(1);
-    }
+    // Conversão da porta passada como argumento
+    int port_arg = atoi(argv[1]);
+    servaddr.sin_port        = htons((unsigned int)port_arg);
 
-    // Exercício 4
+    Bind(listenfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
+
     socklen_t len = sizeof(servaddr);
-    if (getsockname(listenfd, (struct sockaddr *)&servaddr, &len) == -1) {
-        perror("getsockname");
-        exit(1);
-    }
-
-    unsigned int port;
-    port = ntohs(servaddr.sin_port);
-    printf("Port number: %d\n", port);
-    // end of changes
-
+    Getsockname(listenfd, (struct sockaddr *)&servaddr, &len);
 
     if (listen(listenfd, LISTENQ) == -1) {
         perror("listen");
@@ -56,34 +112,35 @@ int main (int argc, char **argv) {
     }
 
     for ( ; ; ) {
-      if ((connfd = accept(listenfd, (struct sockaddr *) NULL, NULL)) == -1 ) {
-        perror("accept");
-        exit(1);
-        }
 
-        //Exercício 6
+        connfd = Accept(listenfd, (struct sockaddr *) NULL, NULL);
 
         len = sizeof(clientaddr);
-        if (getpeername(connfd, (struct sockaddr *)&clientaddr, &len) == -1){
-            perror("getpeername");
-            exit(1);
-        }
+        Getpeername(connfd, (struct sockaddr *)&clientaddr, &len);
 
         char ipCliente[INET_ADDRSTRLEN];
 
         inet_ntop(AF_INET, &(clientaddr.sin_addr), ipCliente, sizeof(ipCliente));
 
         unsigned int portaCliente = ntohs(clientaddr.sin_port);
+        
+        int cpu = GetRandomNumber(100);
+        int memory = GetRandomNumber(100);
+        // char hora[50];
+        // GetCurrentTime(hora, sizeof(hora));
 
-        printf("Cliente conectado: \n");
-        printf("IP: %s\n", ipCliente);
-        printf("Porta: %d\n\n", portaCliente);
+        ticks = time(NULL);
+        sprintf(buf, "IP: %s\nPorta: %d\nHorário: %sCPU: %d%%\nMemória: %d%%\nStatus: Ativo\n",
+            ipCliente,
+            portaCliente,
+            ctime(&ticks),
+            cpu,
+            memory
+        );
+
+        printf(buf);
 
         fflush(stdin);
-
-        //End of exercicio 6
-
-        //Exercicio 7 - impressão da mensagem enviada pelo cliente
 
         int n;
         while ( (n = read(connfd, buf, MAXDATASIZE-1)) > 0) {
@@ -94,8 +151,6 @@ int main (int argc, char **argv) {
                 exit(1);
             }
             break;
-
-        // end of exercicio 7
         }
 
         ticks = time(NULL);
