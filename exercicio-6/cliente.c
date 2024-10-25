@@ -12,6 +12,24 @@
 
 #define MAXLINE 4096
 
+// Função que cria um socket e verifica erros
+int Socket(int family, int type, int flags) {
+    int sockfd;
+    if ((sockfd = socket(family, type, flags)) < 0) {
+        perror("socket");
+        exit(1);
+    } else
+        return sockfd;
+}
+
+// Envelopamento função Getsockname
+void Getsockname(int listenfd, struct sockaddr *__restrict__ servaddr, socklen_t *__restrict__ len) {
+    if (getsockname(listenfd, servaddr, len) == -1) {
+        perror("getsockname");
+        exit(1);
+    }
+}
+
 int main(int argc, char **argv) {
     int    sockfd, n;
     char   recvline[MAXLINE + 1];
@@ -20,7 +38,6 @@ int main(int argc, char **argv) {
     struct sockaddr_in servaddr;
 
 
-    // modificado
     if (argc != 3) {
         strcpy(error,"uso: ");
         strcat(error,argv[0]);
@@ -29,18 +46,13 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    if ( (sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        perror("socket error");
-        exit(1);
-    }
+    sockfd = Socket(AF_INET, SOCK_STREAM, 0);
 
     bzero(&servaddr, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
     
-    // modificado
     int port_arg = atoi(argv[2]);
     servaddr.sin_port   = htons((unsigned int)port_arg);
-    // modificado
 
     if (inet_pton(AF_INET, argv[1], &servaddr.sin_addr) <= 0) {
         perror("inet_pton error");
@@ -56,10 +68,7 @@ int main(int argc, char **argv) {
     struct sockaddr_in local_addr;
     socklen_t addr_len = sizeof(local_addr);
 
-    if (getsockname(sockfd, (struct sockaddr *)&local_addr, &addr_len) < 0) {
-        perror("getsockname");
-        exit(1);
-    }
+    Getsockname(sockfd, (struct sockaddr *)&local_addr, &addr_len);
 
     char ip_str[INET_ADDRSTRLEN];
     inet_ntop(AF_INET, &(local_addr.sin_addr), ip_str, sizeof(ip_str));
@@ -69,7 +78,6 @@ int main(int argc, char **argv) {
     printf("Porta: %d\n\n", ntohs(local_addr.sin_port));
     //
 
-    //Exercicio 7, envio de mensagem para o servidor
 
     printf("Digite a mensagem a ser enviada: ");
     if (fgets(messagebuffer, MAXLINE, stdin) != NULL){
