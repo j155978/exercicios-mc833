@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+
 #define MAXLINE 4096
 
 // Função que cria um socket e verifica erros
@@ -47,62 +48,66 @@ void Connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
 }
 
 int main(int argc, char **argv) {
-    int    sockfd, n;
-    char   recvline[MAXLINE + 1];
-    char   error[MAXLINE + 1];
-    char   messagebuffer[MAXLINE + 1]; //buffer para envio da mensagem
+    int sockfd;
+    char sendline[MAXLINE];
+    char recvline[MAXLINE];
     struct sockaddr_in servaddr;
 
-
     if (argc != 3) {
-        strcpy(error,"uso: ");
-        strcat(error,argv[0]);
-        strcat(error," <IPaddress>");
-        perror(error);
+        fprintf(stderr, "uso: %s <IPaddress> <Port>\n", argv[0]);
         exit(1);
     }
 
     sockfd = Socket(AF_INET, SOCK_STREAM, 0);
 
-    bzero(&servaddr, sizeof(servaddr));
-    servaddr.sin_family = AF_INET;    
-    int port_arg = atoi(argv[2]);
-    servaddr.sin_port   = htons((unsigned int)port_arg);
+    memset(&servaddr, 0, sizeof(servaddr));
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_port = htons(atoi(argv[2]));
 
-    Inet_pton(AF_INET, argv[1], &servaddr.sin_addr);
+    if (inet_pton(AF_INET, argv[1], &servaddr.sin_addr) <= 0) {
+        perror("inet_pton error");
+        exit(1);
+    }
 
-    Connect(sockfd, (struct sockaddr *) &servaddr, sizeof(servaddr));
+    if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
+        perror("connect error");
+        exit(1);
+    }
 
-    struct sockaddr_in local_addr;
-    socklen_t addr_len = sizeof(local_addr);
+    printf("Conexão estabelecida! Digite mensagens para enviar ao servidor.\n");
+    printf("Digite 'exit' para encerrar.\n");
 
-    Getsockname(sockfd, (struct sockaddr *)&local_addr, &addr_len);
-
-    char ip_str[INET_ADDRSTRLEN];
-    inet_ntop(AF_INET, &(local_addr.sin_addr), ip_str, sizeof(ip_str));
-
-    printf("Informações do socket local:\n");
-    printf("IP: %s\n", ip_str);
-    printf("Porta: %d\n\n", ntohs(local_addr.sin_port));
-
-    
-    printf("Digite a mensagem a ser enviada: ");
-    while (fgets(messagebuffer, MAXLINE, stdin) != NULL){
-        write(sockfd, messagebuffer, strlen(messagebuffer));
-
-        while ( (n = read(sockfd, recvline, MAXLINE)) > 0) {
-            recvline[n] = 0;
-            if (fputs(recvline, stdout) == EOF) {
-                perror("fputs error");
-                exit(1);
-            }
+    // Loop interativo para enviar mensagens ao servidor
+    while (1) {
+        printf("Mensagem: ");
+        if (fgets(sendline, MAXLINE, stdin) == NULL) {
+            printf("Erro na leitura da mensagem.\n");
+            continue;
         }
 
-        if (n < 0) {
-            perror("read error");
-            exit(1);
+        // Verifica se o usuário quer encerrar a conexão
+        if (strncmp(sendline, "exit", 4) == 0) {
+            printf("Encerrando a conexão.\n");
+            break;
+        }
+
+        // Envia a mensagem para o servidor
+        if (write(sockfd, sendline, strlen(sendline)) < 0) {
+            perror("Erro ao enviar mensagem");
+            break;
+        }
+
+        // Lê a resposta do servidor
+        ssize_t n = read(sockfd, recvline, MAXLINE);
+        if (n > 0) {
+            recvline[n] = '\0';  // Garantir que o texto está terminado em null
+            printf("Servidor: %s\n", recvline);
+        } else if (n < 0) {
+            perror("Erro na leitura da resposta");
+            break;
         }
     }
 
-    exit(0);
+    close(sockfd);
+    return 0;
 }
