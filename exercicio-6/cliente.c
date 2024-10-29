@@ -30,6 +30,22 @@ void Getsockname(int listenfd, struct sockaddr *__restrict__ servaddr, socklen_t
     }
 }
 
+// Envelopamento da função inet_pton
+void Inet_pton(int family, const char *restrict src, void *restrict dst) {
+    if (inet_pton(AF_INET, src, dst) <= 0) {
+        perror("inet_pton error");
+        exit(1);
+    }
+}
+
+// Envelopamento da função connect
+void Connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
+    if (connect(sockfd, addr, addrlen) < 0) {
+        perror("connect error");
+        exit(1);
+    }    
+}
+
 int main(int argc, char **argv) {
     int    sockfd, n;
     char   recvline[MAXLINE + 1];
@@ -49,22 +65,14 @@ int main(int argc, char **argv) {
     sockfd = Socket(AF_INET, SOCK_STREAM, 0);
 
     bzero(&servaddr, sizeof(servaddr));
-    servaddr.sin_family = AF_INET;
-    
+    servaddr.sin_family = AF_INET;    
     int port_arg = atoi(argv[2]);
     servaddr.sin_port   = htons((unsigned int)port_arg);
 
-    if (inet_pton(AF_INET, argv[1], &servaddr.sin_addr) <= 0) {
-        perror("inet_pton error");
-        exit(1);
-    }
+    Inet_pton(AF_INET, argv[1], &servaddr.sin_addr);
 
-    if (connect(sockfd, (struct sockaddr *) &servaddr, sizeof(servaddr)) < 0) {
-        perror("connect error");
-        exit(1);
-    }
+    Connect(sockfd, (struct sockaddr *) &servaddr, sizeof(servaddr));
 
-    // Exercício 5
     struct sockaddr_in local_addr;
     socklen_t addr_len = sizeof(local_addr);
 
@@ -76,15 +84,13 @@ int main(int argc, char **argv) {
     printf("Informações do socket local:\n");
     printf("IP: %s\n", ip_str);
     printf("Porta: %d\n\n", ntohs(local_addr.sin_port));
-    //
-
+    
 
     printf("Digite a mensagem a ser enviada: ");
     if (fgets(messagebuffer, MAXLINE, stdin) != NULL){
         write(sockfd, messagebuffer, strlen(messagebuffer));
     }
 
-    // end of exercicio 7
 
     while ( (n = read(sockfd, recvline, MAXLINE)) > 0) {
         recvline[n] = 0;

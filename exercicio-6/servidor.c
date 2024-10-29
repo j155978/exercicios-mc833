@@ -84,20 +84,16 @@ void GetCurrentTime(char *hora, size_t tamanho) {
 
 int main (int argc, char **argv) {
     int    listenfd, connfd;
-    // added clientaddr for exercicio 6
     struct sockaddr_in servaddr, clientaddr;
     char   buf[MAXDATASIZE];
 
     time_t ticks;
-
 
     listenfd = Socket(AF_INET, SOCK_STREAM, 0);
 
     bzero(&servaddr, sizeof(servaddr));
     servaddr.sin_family      = AF_INET;
     servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-
-    // Conversão da porta passada como argumento
     int port_arg = atoi(argv[1]);
     servaddr.sin_port        = htons((unsigned int)port_arg);
 
