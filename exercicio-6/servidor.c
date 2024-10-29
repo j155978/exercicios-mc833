@@ -64,6 +64,14 @@ int Accept(int listenfd, struct sockaddr *__restrict__ __addr, socklen_t *__rest
     return connfd;
 }
 
+// Envelopamento função Listen
+void Listen(int sockfd, int backlog) {
+    if (listen(sockfd, backlog) == -1) {
+        perror("listen");
+        exit(1);
+    }    
+}
+
 void GetCurrentTime(char *hora, size_t tamanho) {
     struct timeval tv;
     gettimeofday(&tv, NULL);
@@ -102,14 +110,11 @@ int main (int argc, char **argv) {
     socklen_t len = sizeof(servaddr);
     Getsockname(listenfd, (struct sockaddr *)&servaddr, &len);
 
-    if (listen(listenfd, LISTENQ) == -1) {
-        perror("listen");
-        exit(1);
-    }
+    Listen(listenfd, LISTENQ);
 
     for ( ; ; ) {
-
-        connfd = Accept(listenfd, (struct sockaddr *) NULL, NULL);
+        socklen_t clilen = sizeof(clientaddr);
+        connfd = Accept(listenfd, (struct sockaddr *) &clientaddr, &clilen);
 
         len = sizeof(clientaddr);
         Getpeername(connfd, (struct sockaddr *)&clientaddr, &len);
@@ -133,7 +138,6 @@ int main (int argc, char **argv) {
             cpu,
             memory
         );
-
         printf(buf);
 
         fflush(stdin);
@@ -146,7 +150,7 @@ int main (int argc, char **argv) {
                 perror("fputs error");
                 exit(1);
             }
-            break;
+            fflush(stdin);
         }
 
         ticks = time(NULL);

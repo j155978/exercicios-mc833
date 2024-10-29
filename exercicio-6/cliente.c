@@ -84,25 +84,24 @@ int main(int argc, char **argv) {
     printf("Informações do socket local:\n");
     printf("IP: %s\n", ip_str);
     printf("Porta: %d\n\n", ntohs(local_addr.sin_port));
+
     
-
     printf("Digite a mensagem a ser enviada: ");
-    if (fgets(messagebuffer, MAXLINE, stdin) != NULL){
+    while (fgets(messagebuffer, MAXLINE, stdin) != NULL){
         write(sockfd, messagebuffer, strlen(messagebuffer));
-    }
 
+        while ( (n = read(sockfd, recvline, MAXLINE)) > 0) {
+            recvline[n] = 0;
+            if (fputs(recvline, stdout) == EOF) {
+                perror("fputs error");
+                exit(1);
+            }
+        }
 
-    while ( (n = read(sockfd, recvline, MAXLINE)) > 0) {
-        recvline[n] = 0;
-        if (fputs(recvline, stdout) == EOF) {
-            perror("fputs error");
+        if (n < 0) {
+            perror("read error");
             exit(1);
         }
-    }
-
-    if (n < 0) {
-        perror("read error");
-        exit(1);
     }
 
     exit(0);
