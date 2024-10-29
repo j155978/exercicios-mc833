@@ -14,7 +14,7 @@
 
 
 #define LISTENQ 10
-#define MAXDATASIZE 500
+#define MAXDATASIZE 5000
 
 // Função que retorna um número aleatório de 0 até n-1
 int GetRandomNumber(int n) {
@@ -104,7 +104,7 @@ void PrintServerDefaultMessage(char* buf, char* ipCliente, unsigned int portaCli
         cpu,
         memory
     );
-    printf(buf);    
+    return;  
 }
 
 // Função para lidar com a comunicação de um cliente
@@ -113,6 +113,7 @@ void handle_client(int connfd, char* ipCliente, unsigned int portaCliente) {
     char line[MAXDATASIZE];
 
     PrintServerDefaultMessage(line, ipCliente, portaCliente);
+    write(connfd, line, strlen(line));
 
     while ((n = read(connfd, line, MAXDATASIZE - 1)) > 0) {
         line[n] = '\0';  // Termina a string recebida
@@ -130,6 +131,7 @@ void handle_client(int connfd, char* ipCliente, unsigned int portaCliente) {
 }
 
 int main(int argc, char **argv) {
+    srand(time(NULL));
     int listenfd, connfd;
     struct sockaddr_in servaddr, clientaddr;
 

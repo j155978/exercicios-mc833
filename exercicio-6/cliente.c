@@ -10,7 +10,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-
 #define MAXLINE 4096
 
 // Função que cria um socket e verifica erros
@@ -47,67 +46,101 @@ void Connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
     }    
 }
 
+
+#define max(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a > _b ? _a : _b; })
+
+void cliente(FILE *fp, int sockfd){
+    int maxfdp1, stdineof;
+    fd_set rset;
+    char sendline[MAXLINE], recvline[MAXLINE];
+
+    stdineof = 0;
+
+    FD_ZERO(&rset);
+    for ( ; ; ){
+        if (stdineof == 0)
+            FD_SET(fileno(fp), &rset);
+        
+        FD_SET(sockfd, &rset);
+        maxfdp1 = max(fileno(fp), sockfd) + 1;
+        if (select(maxfdp1, &rset, NULL, NULL, NULL) < 0) {
+            perror("select error");
+            break;
+        }
+
+        if(FD_ISSET(sockfd, &rset)){ //Socket is readable
+            int qtd = read(sockfd, recvline, MAXLINE);
+            
+            if(qtd == 0){
+                if(stdineof == 1)
+                    return; //normal termination
+                else
+                    perror("str_cli: server terminated prematurely");
+            }
+            recvline[qtd] = '\0';
+            fputs(recvline, stdout);
+            char arquivolog[] = "resultscliente.txt";
+            FILE *logFile = fopen(arquivolog, "a");
+            fputs(recvline, logFile);
+            fclose(logFile);
+        }
+
+        if(FD_ISSET(fileno(fp), &rset)){
+            while(fgets(sendline, MAXLINE, fp) != NULL){
+                write(sockfd, sendline, strlen(sendline));
+            }
+            stdineof = 1;
+            shutdown(sockfd, SHUT_WR); //send FIN
+            FD_CLR(fileno(fp), &rset);
+            continue;
+        } //input is readable
+    }
+}
+
+
 int main(int argc, char **argv) {
-    int sockfd;
-    char sendline[MAXLINE];
-    char recvline[MAXLINE];
-    struct sockaddr_in servaddr;
+    int sockfd[2]; // Array para dois sockets
+    struct sockaddr_in servaddr[2];
 
-    if (argc != 3) {
-        fprintf(stderr, "uso: %s <IPaddress> <Port>\n", argv[0]);
+    if (argc != 5) {
+        fprintf(stderr, "uso: %s <IPaddress1> <Port1> <IPaddress2> <Port2>\n", argv[0]);
         exit(1);
     }
 
-    sockfd = Socket(AF_INET, SOCK_STREAM, 0);
+    // Criar e conectar os sockets para os dois servidores
+    for (int i = 0; i < 2; i++) {
+        sockfd[i] = Socket(AF_INET, SOCK_STREAM, 0);
 
-    memset(&servaddr, 0, sizeof(servaddr));
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_port = htons(atoi(argv[2]));
+        memset(&servaddr[i], 0, sizeof(servaddr[i]));
+        servaddr[i].sin_family = AF_INET;
+        servaddr[i].sin_port = htons(atoi(argv[i * 2 + 2]));
 
-    if (inet_pton(AF_INET, argv[1], &servaddr.sin_addr) <= 0) {
-        perror("inet_pton error");
-        exit(1);
+        Inet_pton(AF_INET, argv[i * 2 + 1], &servaddr[i].sin_addr);
+        Connect(sockfd[i], (struct sockaddr *)&servaddr[i], sizeof(servaddr[i]));
     }
 
-    if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
-        perror("connect error");
-        exit(1);
-    }
-
-    printf("Conexão estabelecida! Digite mensagens para enviar ao servidor.\n");
+    printf("Conexões estabelecidas! Você pode enviar mensagens para os dois servidores.\n");
     printf("Digite 'exit' para encerrar.\n");
 
-    // Loop interativo para enviar mensagens ao servidor
-    while (1) {
-        printf("Mensagem: ");
-        if (fgets(sendline, MAXLINE, stdin) == NULL) {
-            printf("Erro na leitura da mensagem.\n");
-            continue;
-        }
 
-        // Verifica se o usuário quer encerrar a conexão
-        if (strncmp(sendline, "exit", 4) == 0) {
-            printf("Encerrando a conexão.\n");
-            break;
-        }
+    char arquivo[] = "dados.txt";
+    
 
-        // Envia a mensagem para o servidor
-        if (write(sockfd, sendline, strlen(sendline)) < 0) {
-            perror("Erro ao enviar mensagem");
-            break;
-        }
-
-        // Lê a resposta do servidor
-        ssize_t n = read(sockfd, recvline, MAXLINE);
-        if (n > 0) {
-            recvline[n] = '\0';  // Garantir que o texto está terminado em null
-            printf("Servidor: %s\n", recvline);
-        } else if (n < 0) {
-            perror("Erro na leitura da resposta");
-            break;
-        }
+    // Executa a função cliente para cada socket
+    for (int i = 0; i < 2; i++) {
+        printf("Conectando ao servidor %d...\n", i + 1);
+        FILE *logFile = fopen(arquivo, "r");
+        cliente(logFile, sockfd[i]);
+        fclose(logFile);
     }
 
-    close(sockfd);
+    // Fechar sockets
+    for (int i = 0; i < 2; i++) {
+        close(sockfd[i]);
+    }
+
     return 0;
 }
