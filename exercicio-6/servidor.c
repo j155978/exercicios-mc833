@@ -91,10 +91,28 @@ void GetCurrentTime(char *hora, size_t tamanho) {
              tv.tv_usec / 1000); // Converte microsegundos para milissegundos
 }
 
+void PrintServerDefaultMessage(char* buf, char* ipCliente, unsigned int portaCliente) {
+    time_t ticks;
+    int cpu = GetRandomNumber(100);
+    int memory = GetRandomNumber(100);
+    
+    ticks = time(NULL);
+    sprintf(buf, "IP: %s\nPorta: %d\nHorário: %sCPU: %d%%\nMemória: %d%%\nStatus: Ativo\n",
+        ipCliente,
+        portaCliente,
+        ctime(&ticks),
+        cpu,
+        memory
+    );
+    printf(buf);    
+}
+
 // Função para lidar com a comunicação de um cliente
-void handle_client(int connfd) {
+void handle_client(int connfd, char* ipCliente, unsigned int portaCliente) {
     ssize_t n;
     char line[MAXDATASIZE];
+
+    PrintServerDefaultMessage(line, ipCliente, portaCliente);
 
     while ((n = read(connfd, line, MAXDATASIZE - 1)) > 0) {
         line[n] = '\0';  // Termina a string recebida
@@ -136,18 +154,20 @@ int main(int argc, char **argv) {
 
     for (;;) {
         socklen_t clilen = sizeof(clientaddr);
-        connfd = accept(listenfd, (struct sockaddr *)&clientaddr, &clilen);
-        if (connfd < 0) {
-            perror("Erro ao aceitar conexão");
-            continue;
-        }
+        connfd = Accept(listenfd, (struct sockaddr *)&clientaddr, &clilen);
+        
+        Getpeername(connfd, (struct sockaddr *)&clientaddr, &clilen);
+
+        char ipCliente[INET_ADDRSTRLEN];
+        inet_ntop(AF_INET, &(clientaddr.sin_addr), ipCliente, sizeof(ipCliente));
+        unsigned int portaCliente = ntohs(clientaddr.sin_port);
 
         printf("Cliente conectado.\n");
 
         pid_t pid = fork();
         if (pid == 0) {
             close(listenfd);
-            handle_client(connfd);
+            handle_client(connfd, ipCliente, portaCliente);
             exit(0);
         } else if (pid > 0) { 
             close(connfd); 
