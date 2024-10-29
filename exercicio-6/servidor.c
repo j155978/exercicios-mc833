@@ -150,7 +150,7 @@ int main (int argc, char **argv) {
                 perror("fputs error");
                 exit(1);
             }
-            fflush(stdin);
+            break;
         }
 
         ticks = time(NULL);
