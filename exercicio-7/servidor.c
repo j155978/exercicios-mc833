@@ -31,6 +31,7 @@ int Socket(int family, int type, int flags) {
     return sockfd;
 }
 
+
 // Envelopamento função Getpeername
 void Getpeername(int connfd, struct sockaddr *__restrict__ client_addr, socklen_t *__restrict__ addrlen) {
     if (getpeername(connfd, client_addr, addrlen) < 0) {
@@ -73,6 +74,36 @@ void Listen(int sockfd, int backlog) {
     }    
 }
 
+void Setsockopt(int socket, int level, int option_name, const void *option_value, socklen_t option_len) {
+    if (setsockopt(socket, level, option_name, option_value, option_len) == -1) {
+        perror("setsockopt");
+        exit(1);
+    }
+}
+
+void Sendto(int socket, const void *message, size_t length, int flags, const struct sockaddr *dest_addr, socklen_t dest_len) {
+    if (sendto(socket, message, length, flags, dest_addr, dest_len) == -1) {
+        perror("sendto");
+        exit(1);
+    }
+}
+
+int Recvfrom(int socket, void *restrict buffer, size_t length, int flags, struct sockaddr *restrict address, socklen_t *restrict address_len) {
+    int messagelen;
+    if ((messagelen = recvfrom(socket, buffer, length, flags, address, address_len)) == -1) {
+        perror("recvfrom");
+        exit(1);
+    }
+    return messagelen;
+}
+
+void Close(int fildes) {
+    if (close(fildes) == -1) {
+        perror("close");
+        exit(1);        
+    }
+}
+
 int main(int argc, char **argv) {
     int listenfd, connfd, udpfd, nready, maxfdp1;
     char mesg[MAXLINE];
@@ -106,7 +137,7 @@ int main(int argc, char **argv) {
     servaddr.sin_port = htons((unsigned int)port_arg);
     Bind(udpfd, (struct sockaddr *)&servaddr, sizeof(servaddr)); 
 
-    Signal(SIGCHLD, sig_chld); /* must call waitpid() */
+    // Signal(SIGCHLD, sig_chld); /* must call waitpid() */
 
     FD_ZERO(&rset);
     maxfdp1 = max(listenfd, udpfd) + 1;
@@ -114,10 +145,13 @@ int main(int argc, char **argv) {
         FD_SET(listenfd, &rset);
         FD_SET(udpfd, &rset);
         if ( (nready = select(maxfdp1, &rset, NULL, NULL, NULL)) < 0) {
-            if (errno == EINTR)
+            if (errno == EINTR) {
                 continue; /* back to for() */
-            else
-                err_sys("select error");
+            }
+            else {
+                perror("select error");
+                exit(1);
+            }
         }
         
         if (FD_ISSET(listenfd, &rset)) {
