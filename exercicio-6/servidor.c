@@ -10,10 +10,11 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/time.h>
+#include <sys/wait.h>
 
 
 #define LISTENQ 10
-#define MAXDATASIZE 500
+#define MAXDATASIZE 5000
 
 // Função que retorna um número aleatório de 0 até n-1
 int GetRandomNumber(int n) {
@@ -90,75 +91,96 @@ void GetCurrentTime(char *hora, size_t tamanho) {
              tv.tv_usec / 1000); // Converte microsegundos para milissegundos
 }
 
-int main (int argc, char **argv) {
-    int    listenfd, connfd;
-    struct sockaddr_in servaddr, clientaddr;
-    char   buf[MAXDATASIZE];
-
+void PrintServerDefaultMessage(char* buf, char* ipCliente, unsigned int portaCliente) {
     time_t ticks;
+    int cpu = GetRandomNumber(100);
+    int memory = GetRandomNumber(100);
+    
+    ticks = time(NULL);
+    sprintf(buf, "IP: %s\nPorta: %d\nHorário: %sCPU: %d%%\nMemória: %d%%\nStatus: Ativo\n",
+        ipCliente,
+        portaCliente,
+        ctime(&ticks),
+        cpu,
+        memory
+    );
+    return;  
+}
+
+// Função para lidar com a comunicação de um cliente
+void handle_client(int connfd, char* ipCliente, unsigned int portaCliente) {
+    ssize_t n;
+    char line[MAXDATASIZE];
+
+    PrintServerDefaultMessage(line, ipCliente, portaCliente);
+    write(connfd, line, strlen(line));
+
+    while ((n = read(connfd, line, MAXDATASIZE - 1)) > 0) {
+        line[n] = '\0';  // Termina a string recebida
+        printf("Mensagem do cliente: %s\n", line);
+        
+        // Envia de volta a mensagem recebida para o cliente como confirmação
+        write(connfd, line, strlen(line));
+    }
+
+    if (n < 0) {
+        perror("Erro na leitura do socket");
+    }
+    printf("Cliente desconectado.\n");
+    close(connfd);  // Fecha o socket para este cliente
+}
+
+int main(int argc, char **argv) {
+    srand(time(NULL));
+    int listenfd, connfd;
+    struct sockaddr_in servaddr, clientaddr;
+
+    if (argc != 2) {
+        fprintf(stderr, "Uso: %s <Port>\n", argv[0]);
+        exit(1);
+    }
 
     listenfd = Socket(AF_INET, SOCK_STREAM, 0);
 
     bzero(&servaddr, sizeof(servaddr));
-    servaddr.sin_family      = AF_INET;
+    servaddr.sin_family = AF_INET;
     servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
     int port_arg = atoi(argv[1]);
-    servaddr.sin_port        = htons((unsigned int)port_arg);
+    servaddr.sin_port = htons((unsigned int)port_arg);
 
     Bind(listenfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
 
-    socklen_t len = sizeof(servaddr);
-    Getsockname(listenfd, (struct sockaddr *)&servaddr, &len);
-
     Listen(listenfd, LISTENQ);
 
-    for ( ; ; ) {
-        socklen_t clilen = sizeof(clientaddr);
-        connfd = Accept(listenfd, (struct sockaddr *) &clientaddr, &clilen);
+    printf("Servidor aguardando conexões...\n");
 
-        len = sizeof(clientaddr);
-        Getpeername(connfd, (struct sockaddr *)&clientaddr, &len);
+    for (;;) {
+        socklen_t clilen = sizeof(clientaddr);
+        connfd = Accept(listenfd, (struct sockaddr *)&clientaddr, &clilen);
+        
+        Getpeername(connfd, (struct sockaddr *)&clientaddr, &clilen);
 
         char ipCliente[INET_ADDRSTRLEN];
-
         inet_ntop(AF_INET, &(clientaddr.sin_addr), ipCliente, sizeof(ipCliente));
-
         unsigned int portaCliente = ntohs(clientaddr.sin_port);
-        
-        int cpu = GetRandomNumber(100);
-        int memory = GetRandomNumber(100);
-        // char hora[50];
-        // GetCurrentTime(hora, sizeof(hora));
 
-        ticks = time(NULL);
-        sprintf(buf, "IP: %s\nPorta: %d\nHorário: %sCPU: %d%%\nMemória: %d%%\nStatus: Ativo\n",
-            ipCliente,
-            portaCliente,
-            ctime(&ticks),
-            cpu,
-            memory
-        );
-        printf(buf);
+        printf("Cliente conectado.\n");
 
-        fflush(stdin);
-
-        int n;
-        while ( (n = read(connfd, buf, MAXDATASIZE-1)) > 0) {
-            buf[n] = 0;
-            printf("Mensagem recebida do cliente:\n");
-            if (fputs(buf, stdout) == EOF) {
-                perror("fputs error");
-                exit(1);
-            }
-            break;
+        pid_t pid = fork();
+        if (pid == 0) {
+            close(listenfd);
+            handle_client(connfd, ipCliente, portaCliente);
+            exit(0);
+        } else if (pid > 0) { 
+            close(connfd); 
+        } else {
+            perror("Erro no fork");
+            close(connfd);
         }
 
-        ticks = time(NULL);
-        snprintf(buf, sizeof(buf), "Hello from server!\nTime: %.24s\r\n", ctime(&ticks));
-        write(connfd, buf, strlen(buf));
-
-
-        close(connfd);
+        while (waitpid(-1, NULL, WNOHANG) > 0) {
+            
+        }
     }
-    return(0);
+    return 0;
 }
