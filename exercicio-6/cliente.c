@@ -82,7 +82,7 @@ void cliente(FILE *fp, int sockfd){
             }
             recvline[qtd] = '\0';
             fputs(recvline, stdout);
-            char arquivolog[] = "resultscliente.txt";
+            char arquivolog[] = "saida.txt";
             FILE *logFile = fopen(arquivolog, "a");
             fputs(recvline, logFile);
             fclose(logFile);
@@ -126,7 +126,7 @@ int main(int argc, char **argv) {
     printf("Digite 'exit' para encerrar.\n");
 
 
-    char arquivo[] = "dados.txt";
+    char arquivo[] = "entrada.txt";
     
 
     // Executa a função cliente para cada socket
