@@ -16,9 +16,89 @@
 #define LISTENQ 10
 #define MAXLINE 500
 
-// Função que retorna um número aleatório de 0 até n-1
-int GetRandomNumber(int n) {
-    return rand() % n;
+int Socket(int family, int type, int flags);
+void Getpeername(int connfd, struct sockaddr *__restrict__ client_addr, socklen_t *__restrict__ addrlen);
+void Bind(int listenfd, const struct sockaddr *servaddr, socklen_t __len);
+void Getsockname(int listenfd, struct sockaddr *__restrict__ servaddr, socklen_t *__restrict__ len);
+int Accept(int listenfd, struct sockaddr *__restrict__ __addr, socklen_t *__restrict__ __addr_len);
+void Listen(int sockfd, int backlog);
+void Setsockopt(int socket, int level, int option_name, const void *option_value, socklen_t option_len);
+void Sendto(int socket, const void *message, size_t length, int flags, const struct sockaddr *dest_addr, socklen_t dest_len);
+int Recvfrom(int socket, void *restrict buffer, size_t length, int flags, struct sockaddr *restrict address, socklen_t *restrict address_len);
+void Close(int fildes);
+int max(int x1, int x2);
+pid_t Fork();
+void str_echo(int sockfd);
+ssize_t Writen(int fd, const void *vptr, size_t n);
+
+
+int main(int argc, char **argv) {
+    int listenfd, connfd, udpfd, nready, maxfdp1;
+    char mesg[MAXLINE];
+    pid_t childpid;
+    fd_set rset;
+    ssize_t n;
+    socklen_t len;
+    const int on = 1;
+    struct sockaddr_in cliaddr, servaddr;
+    void sig_chld(int);
+    int port_arg = atoi(argv[1]);
+
+    /* create listening TCP socket */
+    listenfd = Socket(AF_INET, SOCK_STREAM, 0);
+    bzero(&servaddr, sizeof(servaddr));
+    
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    servaddr.sin_port = htons((unsigned int)port_arg);
+
+    Setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+    Bind(listenfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
+    Listen(listenfd, LISTENQ);
+
+    
+    /* create UDP socket */
+    udpfd = Socket(AF_INET, SOCK_DGRAM, 0);
+    bzero(&servaddr, sizeof(servaddr));
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    servaddr.sin_port = htons((unsigned int)port_arg);
+    Bind(udpfd, (struct sockaddr *)&servaddr, sizeof(servaddr)); 
+
+    // Signal(SIGCHLD, sig_chld); /* must call waitpid() */
+
+    FD_ZERO(&rset);
+    maxfdp1 = max(listenfd, udpfd) + 1;
+    for ( ; ; ) {
+        FD_SET(listenfd, &rset);
+        FD_SET(udpfd, &rset);
+        if ( (nready = select(maxfdp1, &rset, NULL, NULL, NULL)) < 0) {
+            if (errno == EINTR) {
+                continue; /* back to for() */
+            }
+            else {
+                perror("select error");
+                exit(1);
+            }
+        }
+        
+        if (FD_ISSET(listenfd, &rset)) {
+            len = sizeof(cliaddr);
+            connfd = Accept(listenfd, (struct sockaddr *) &cliaddr, &len);
+            
+            if ( (childpid = Fork()) == 0) { /* child process */
+                Close(listenfd); /* close listening socket */
+                str_echo(connfd); /* process the request */
+                exit(0);
+            }
+            Close(connfd); /* parent closes connected socket */
+        }
+        if (FD_ISSET(udpfd, &rset)) { 
+            len = sizeof(cliaddr);
+            n = Recvfrom(udpfd, mesg, MAXLINE, 0, (struct sockaddr *) &cliaddr, &len);
+            Sendto(udpfd, mesg, n, 0, (struct sockaddr *) &cliaddr, len);
+        }
+    }           
 }
 
 // Função para criar um socket e verificar erros
@@ -30,7 +110,6 @@ int Socket(int family, int type, int flags) {
     }
     return sockfd;
 }
-
 
 // Envelopamento função Getpeername
 void Getpeername(int connfd, struct sockaddr *__restrict__ client_addr, socklen_t *__restrict__ addrlen) {
@@ -104,71 +183,54 @@ void Close(int fildes) {
     }
 }
 
-int main(int argc, char **argv) {
-    int listenfd, connfd, udpfd, nready, maxfdp1;
-    char mesg[MAXLINE];
-    pid_t childpid;
-    fd_set rset;
+int max(int x1, int x2) {
+    return x1 > x2 ? x1 : x2;
+}
+
+pid_t Fork() {
+    pid_t pid = fork();
+    if (pid < 0) {
+        perror("fork");
+        exit(1);
+    }
+
+    return pid;
+}
+
+void str_echo(int sockfd) {
     ssize_t n;
-    socklen_t len;
-    const int on = 1;
-    struct sockaddr_in cliaddr, servaddr;
-    void sig_chld(int);
-    int port_arg = atoi(argv[1]);
+    char buf[MAXLINE];
 
-    /* create listening TCP socket */
-    listenfd = Socket(AF_INET, SOCK_STREAM, 0);
-    bzero(&servaddr, sizeof(servaddr));
-    
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    servaddr.sin_port = htons((unsigned int)port_arg);
-
-    Setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
-    Bind(listenfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
-    Listen(listenfd, LISTENQ);
-
-    
-    /* create UDP socket */
-    udpfd = Socket(AF_INET, SOCK_DGRAM, 0);
-    bzero(&servaddr, sizeof(servaddr));
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    servaddr.sin_port = htons((unsigned int)port_arg);
-    Bind(udpfd, (struct sockaddr *)&servaddr, sizeof(servaddr)); 
-
-    // Signal(SIGCHLD, sig_chld); /* must call waitpid() */
-
-    FD_ZERO(&rset);
-    maxfdp1 = max(listenfd, udpfd) + 1;
-    for ( ; ; ) {
-        FD_SET(listenfd, &rset);
-        FD_SET(udpfd, &rset);
-        if ( (nready = select(maxfdp1, &rset, NULL, NULL, NULL)) < 0) {
-            if (errno == EINTR) {
-                continue; /* back to for() */
-            }
-            else {
-                perror("select error");
-                exit(1);
-            }
-        }
+    again:
+        while ( (n = read(sockfd, buf, MAXLINE)) > 0)
+            Writen(sockfd, buf, n);
+    if (n < 0 && errno == EINTR) {
+        goto again;
+    } else if (n < 0) {
+        perror("str_echo: read error");
+        exit(1);
+    }
         
-        if (FD_ISSET(listenfd, &rset)) {
-            len = sizeof(cliaddr);
-            connfd = Accept(listenfd, (struct sockaddr *) &cliaddr, &len);
-            
-            if ( (childpid = Fork()) == 0) { /* child process */
-                Close(listenfd); /* close listening socket */
-                str_echo(connfd); /* process the request */
-                exit(0);
+}
+
+ssize_t Writen(int fd, const void *vptr, size_t n) {
+    size_t nleft;
+    ssize_t nwritten;
+    const char *ptr;
+
+    ptr = vptr;
+    nleft = n;
+
+    while (nleft > 0) {
+        if ((nwritten = write(fd, ptr, nleft)) <= 0) {
+            if (nwritten < 0 && errno == EINTR) {
+                nwritten = 0; /* and call write() again */
+            } else {
+                return (-1); /* error */
             }
-            Close(connfd); /* parent closes connected socket */
         }
-        if (FD_ISSET(udpfd, &rset)) { 
-            len = sizeof(cliaddr);
-            n = Recvfrom(udpfd, mesg, MAXLINE, 0, (struct sockaddr *) &cliaddr, &len);
-            Sendto(udpfd, mesg, n, 0, (struct sockaddr *) &cliaddr, len);
-        }
-    }           
+        nleft -= nwritten;
+        ptr += nwritten;
+    }
+    return (n);
 }
