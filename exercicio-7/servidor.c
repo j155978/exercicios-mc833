@@ -32,6 +32,10 @@ void str_echo(int sockfd);
 ssize_t Writen(int fd, const void *vptr, size_t n);
 
 
+typedef void Sigfunc(int);
+Sigfunc *Signal(int signo, Sigfunc *func);
+
+
 int main(int argc, char **argv) {
     int listenfd, connfd, udpfd, nready, maxfdp1;
     char mesg[MAXLINE];
@@ -234,3 +238,30 @@ ssize_t Writen(int fd, const void *vptr, size_t n) {
     }
     return (n);
 }
+
+Sigfunc *Signal(int signo, Sigfunc *func) {
+    struct sigaction act, oact;
+
+    // Configura a estrutura sigaction para o novo manipulador de sinal
+    act.sa_handler = func;
+    sigemptyset(&act.sa_mask);  // Limpa o conjunto de sinais bloqueados
+    act.sa_flags = 0;
+
+    // Configura flags específicas para SIGALRM e outros sinais
+    if (signo == SIGALRM) {
+        #ifdef SA_INTERRUPT
+            act.sa_flags |= SA_INTERRUPT;  // SunOS 4.x: Reinicia chamadas interrompidas
+        #endif
+    } else {
+        #ifdef SA_RESTART
+            act.sa_flags |= SA_RESTART;  // SVR4, 4.4BSD: Reinicia chamadas interrompidas
+        #endif
+    }
+
+    // Registra o novo manipulador de sinal
+    if (sigaction(signo, &act, &oact) < 0)
+        return (SIG_ERR);
+
+    // Retorna o antigo manipulador de sinal
+    return (oact.sa_handler);
+} 
