@@ -30,6 +30,7 @@ int max(int x1, int x2);
 pid_t Fork();
 void str_echo(int sockfd);
 ssize_t Writen(int fd, const void *vptr, size_t n);
+void sig_chld(int signo);
 
 
 typedef void Sigfunc(int);
@@ -69,7 +70,7 @@ int main(int argc, char **argv) {
     servaddr.sin_port = htons((unsigned int)port_arg);
     Bind(udpfd, (struct sockaddr *)&servaddr, sizeof(servaddr)); 
 
-    // Signal(SIGCHLD, sig_chld); /* must call waitpid() */
+    Signal(SIGCHLD, sig_chld); /* must call waitpid() */
 
     FD_ZERO(&rset);
     maxfdp1 = max(listenfd, udpfd) + 1;
@@ -264,4 +265,15 @@ Sigfunc *Signal(int signo, Sigfunc *func) {
 
     // Retorna o antigo manipulador de sinal
     return (oact.sa_handler);
-} 
+}
+
+void sig_chld(int signo) {
+    pid_t pid;
+    int stat;
+
+    while ((pid = waitpid(-1, &stat, WNOHANG)) > 0) {
+        printf("child %d terminated\n", pid);
+    }
+
+    return;
+}
