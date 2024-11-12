@@ -49,6 +49,9 @@ int main(int argc, char **argv) {
     void sig_chld(int);
     int port_arg = atoi(argv[1]);
 
+    struct sockaddr_in clients[100];  // Armazena endereços dos clientes
+    int client_count = 0;
+
     /* create listening TCP socket */
     listenfd = Socket(AF_INET, SOCK_STREAM, 0);
     bzero(&servaddr, sizeof(servaddr));
@@ -101,7 +104,27 @@ int main(int argc, char **argv) {
         if (FD_ISSET(udpfd, &rset)) { 
             len = sizeof(cliaddr);
             n = Recvfrom(udpfd, mesg, MAXLINE, 0, (struct sockaddr *) &cliaddr, &len);
-            Sendto(udpfd, mesg, n, 0, (struct sockaddr *) &cliaddr, len);
+
+            char mensage[500] = "asdasdasdasd";
+
+            printf("Clientes conectados = %d\n", client_count);
+
+            int in = 0;
+            for(int i = 0; i < client_count; i++){
+                if(clients[i].sin_port == cliaddr.sin_port){
+                    in = 1;
+                }
+            }
+
+            if(in == 0){
+                clients[client_count] = cliaddr;
+                client_count++;
+            }
+
+            for(int i = 0 ; i < client_count ; i++){
+                Sendto(udpfd, mensage, n, 0, (struct sockaddr *) &clients[i], len);
+            }
+
         }
     }           
 }

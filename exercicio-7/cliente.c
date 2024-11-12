@@ -39,8 +39,14 @@ void dg_cli(FILE *fp, int sockfd, const struct sockaddr *pservaddr, socklen_t se
 
     Connect(sockfd, (struct sockaddr *) pservaddr, servlen);
 
+    printf("dglceieeei!");
 
     while (fgets(sendline, MAXLINE, fp) != NULL) {
+
+        if(strcmp(sendline, "") == 0){
+            break;
+        }
+
         write(sockfd, sendline, strlen(sendline));
 
         n = read(sockfd, recvline, MAXLINE);
@@ -48,6 +54,24 @@ void dg_cli(FILE *fp, int sockfd, const struct sockaddr *pservaddr, socklen_t se
         recvline[n] = 0;
         fputs(recvline, stdout);
     }
+}
+
+void listener(FILE *fp, int sockfd, const struct sockaddr *pservaddr, socklen_t servlen){
+
+    printf("Ouvindo!");
+
+    int n;
+    char recvline[MAXLINE + 1];
+
+    Connect(sockfd, (struct sockaddr *) pservaddr, servlen);
+
+    n = read(sockfd, recvline, MAXLINE);
+
+    if(n != 0){
+        recvline[n] = 0;
+        fputs(recvline, stdout);
+    }
+
 }
 
 int main(int argc, char **argv){
@@ -65,6 +89,8 @@ int main(int argc, char **argv){
     sockfd = Socket(AF_INET, SOCK_DGRAM, 0);
 
     dg_cli(stdin, sockfd, (struct sockaddr *) &servaddr, sizeof(servaddr));
+
+    listener(stdin, sockfd, (struct sockaddr *) &servaddr, sizeof(servaddr));
 
     exit(0);
 }
