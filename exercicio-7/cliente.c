@@ -27,70 +27,42 @@ pid_t Fork();
 void str_echo(int sockfd);
 void Connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 ssize_t Writen(int fd, const void *vptr, size_t n);
+void dg_cli(FILE *fp, int sockfd, const struct sockaddr *pservaddr, socklen_t servlen);
+void listener(FILE *fp, int sockfd, const struct sockaddr *pservaddr, socklen_t servlen);
 
 typedef void Sigfunc(int);
 Sigfunc *Signal(int signo, Sigfunc *func);
 
 #define MAXLINE 10000
 
-void dg_cli(FILE *fp, int sockfd, const struct sockaddr *pservaddr, socklen_t servlen){
-    int n;
-    char sendline[MAXLINE], recvline[MAXLINE + 1];
-
-    Connect(sockfd, (struct sockaddr *) pservaddr, servlen);
-
-    printf("dglceieeei!");
-
-    while (fgets(sendline, MAXLINE, fp) != NULL) {
-
-        if(strcmp(sendline, "") == 0){
-            break;
-        }
-
-        write(sockfd, sendline, strlen(sendline));
-
-        n = read(sockfd, recvline, MAXLINE);
-
-        recvline[n] = 0;
-        fputs(recvline, stdout);
-    }
-}
-
-void listener(FILE *fp, int sockfd, const struct sockaddr *pservaddr, socklen_t servlen){
-
-    printf("Ouvindo!");
-
-    int n;
-    char recvline[MAXLINE + 1];
-
-    Connect(sockfd, (struct sockaddr *) pservaddr, servlen);
-
-    n = read(sockfd, recvline, MAXLINE);
-
-    if(n != 0){
-        recvline[n] = 0;
-        fputs(recvline, stdout);
-    }
-
-}
-
 int main(int argc, char **argv){
-    int sockfd;
-    struct sockaddr_in servaddr;
+    int sockUcpFd, sockTcpFd;
+    struct sockaddr_in servaddrUdp, servaddrTcp;
 
     if(argc < 3)
         perror("Usage: cliente <IP>");
 
-    bzero(&servaddr, sizeof(servaddr));
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_port = htons((unsigned int)atoi(argv[2]));
-    inet_pton(AF_INET, argv[1], &servaddr.sin_addr);
+    bzero(&servaddrUdp, sizeof(servaddrUdp));
+    servaddrUdp.sin_family = AF_INET;
+    servaddrUdp.sin_port = htons((unsigned int)atoi(argv[2]));
+    inet_pton(AF_INET, argv[1], &servaddrUdp.sin_addr);
 
-    sockfd = Socket(AF_INET, SOCK_DGRAM, 0);
+    
+    // Connect UDP
+    sockUcpFd = Socket(AF_INET, SOCK_DGRAM, 0);
+    dg_cli(stdin, sockUcpFd, (struct sockaddr *) &servaddrUdp, sizeof(servaddrUdp));
 
-    dg_cli(stdin, sockfd, (struct sockaddr *) &servaddr, sizeof(servaddr));
+    
+    // Connect TCP
+    bzero(&servaddrTcp, sizeof(servaddrTcp));
+    servaddrTcp.sin_family = AF_INET;
+    servaddrTcp.sin_port = htons((unsigned int)atoi(argv[2]));
+    inet_pton(AF_INET, argv[1], &servaddrTcp.sin_addr);
+    sockTcpFd = Socket(AF_INET, SOCK_STREAM, 0);
 
-    listener(stdin, sockfd, (struct sockaddr *) &servaddr, sizeof(servaddr));
+
+    connect(sockTcpFd, (struct sockaddr *)&servaddrTcp, sizeof(servaddrTcp));
+    
 
     exit(0);
 }
@@ -261,4 +233,25 @@ Sigfunc *Signal(int signo, Sigfunc *func) {
 
     // Retorna o antigo manipulador de sinal
     return (oact.sa_handler);
-} 
+}
+
+void dg_cli(FILE *fp, int sockfd, const struct sockaddr *pservaddr, socklen_t servlen){
+    int n;
+    char sendline[MAXLINE], recvline[MAXLINE + 1];
+
+    Connect(sockfd, (struct sockaddr *) pservaddr, servlen);
+
+    while (fgets(sendline, MAXLINE, fp) != NULL) {
+
+        if(strcmp(sendline, "") == 0){
+            break;
+        }
+
+        write(sockfd, sendline, strlen(sendline));
+
+        n = read(sockfd, recvline, MAXLINE);
+
+        recvline[n] = 0;
+        fputs(recvline, stdout);
+    }
+}
