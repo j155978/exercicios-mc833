@@ -105,8 +105,6 @@ int main(int argc, char **argv) {
             len = sizeof(cliaddr);
             n = Recvfrom(udpfd, mesg, MAXLINE, 0, (struct sockaddr *) &cliaddr, &len);
 
-            char mensage[500] = "asdasdasdasd";
-
             printf("Clientes conectados = %d\n", client_count);
 
             int in = 0;
@@ -122,7 +120,7 @@ int main(int argc, char **argv) {
             }
 
             for(int i = 0 ; i < client_count ; i++){
-                Sendto(udpfd, mensage, n, 0, (struct sockaddr *) &clients[i], len);
+                Sendto(udpfd, mesg, n, 0, (struct sockaddr *) &clients[i], len);
             }
 
         }
