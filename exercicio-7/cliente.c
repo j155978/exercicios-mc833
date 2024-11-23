@@ -35,24 +35,31 @@ Sigfunc *Signal(int signo, Sigfunc *func);
 
 #define MAXLINE 10000
 
+char nome_cliente[1000];
+
 int main(int argc, char **argv){
     int sockUcpFd, sockTcpFd;
     struct sockaddr_in servaddrUdp, servaddrTcp;
 
-    if(argc < 3)
-        perror("Usage: cliente <IP>");
+    if(argc < 4)
+        perror("Usage: cliente <IP> <porta> <nomecliente>");
 
     bzero(&servaddrUdp, sizeof(servaddrUdp));
     servaddrUdp.sin_family = AF_INET;
     servaddrUdp.sin_port = htons((unsigned int)atoi(argv[2]));
     inet_pton(AF_INET, argv[1], &servaddrUdp.sin_addr);
 
+    strcpy(nome_cliente, argv[3]);
     
+
+
     // Connect UDP
     sockUcpFd = Socket(AF_INET, SOCK_DGRAM, 0);
     dg_cli(stdin, sockUcpFd, (struct sockaddr *) &servaddrUdp, sizeof(servaddrUdp));
 
-    
+
+
+
     // Connect TCP
     bzero(&servaddrTcp, sizeof(servaddrTcp));
     servaddrTcp.sin_family = AF_INET;
@@ -60,9 +67,46 @@ int main(int argc, char **argv){
     inet_pton(AF_INET, argv[1], &servaddrTcp.sin_addr);
     sockTcpFd = Socket(AF_INET, SOCK_STREAM, 0);
 
-
     connect(sockTcpFd, (struct sockaddr *)&servaddrTcp, sizeof(servaddrTcp));
+
     
+    struct timeval timeout;
+    fd_set readfds;
+    for(;;) {
+        char recvline[MAXLINE + 1], sendline[MAXLINE];
+
+        FD_ZERO(&readfds);
+        FD_SET(sockUcpFd, &readfds); 
+        FD_SET(STDIN_FILENO, &readfds);
+
+        timeout.tv_sec = 5;
+        timeout.tv_usec = 0; 
+
+        int nready = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
+
+        if (nready < 0) {
+            perror("Erro no select");
+            exit(1);
+        }
+
+        if (FD_ISSET(sockUcpFd, &readfds)) {
+            int n = read(sockUcpFd, recvline, MAXLINE);
+            if (n > 0) {
+                recvline[n] = 0;
+                fputs(recvline, stdout);
+                fflush(stdout);
+            }
+        } 
+        if (FD_ISSET(STDIN_FILENO, &readfds)) {
+            if (fgets(sendline, MAXLINE, stdin) != NULL) {
+                if (strcmp(sendline, "") != 0) {
+                    printf("Estarei enviando uma mensagem: %s", sendline);
+                    send(sockTcpFd, sendline, strlen(sendline), 0);
+                }
+            }
+        }
+
+    }
 
     exit(0);
 }
@@ -236,22 +280,13 @@ Sigfunc *Signal(int signo, Sigfunc *func) {
 }
 
 void dg_cli(FILE *fp, int sockfd, const struct sockaddr *pservaddr, socklen_t servlen){
-    int n;
-    char sendline[MAXLINE], recvline[MAXLINE + 1];
+
+    char sendline[MAXLINE];
 
     Connect(sockfd, (struct sockaddr *) pservaddr, servlen);
 
-    while (fgets(sendline, MAXLINE, fp) != NULL) {
+    sprintf(sendline, "Cliente novo conectado: %s\n", nome_cliente);
 
-        if(strcmp(sendline, "") == 0){
-            break;
-        }
+    write(sockfd, sendline, strlen(sendline));
 
-        write(sockfd, sendline, strlen(sendline));
-
-        n = read(sockfd, recvline, MAXLINE);
-
-        recvline[n] = 0;
-        fputs(recvline, stdout);
-    }
 }

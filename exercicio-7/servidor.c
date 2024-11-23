@@ -36,6 +36,7 @@ void sig_chld(int signo);
 typedef void Sigfunc(int);
 Sigfunc *Signal(int signo, Sigfunc *func);
 
+int client_count = 0;
 
 int main(int argc, char **argv) {
     int listenfd, connfd, udpfd, nready, maxfdp1;
@@ -50,7 +51,7 @@ int main(int argc, char **argv) {
     int port_arg = atoi(argv[1]);
 
     struct sockaddr_in clients[100];  // Armazena endereços dos clientes
-    int client_count = 0;
+
 
     /* create listening TCP socket */
     listenfd = Socket(AF_INET, SOCK_STREAM, 0);
@@ -105,8 +106,6 @@ int main(int argc, char **argv) {
             len = sizeof(cliaddr);
             n = Recvfrom(udpfd, mesg, MAXLINE, 0, (struct sockaddr *) &cliaddr, &len);
 
-            printf("Clientes conectados = %d\n", client_count);
-
             int in = 0;
             for(int i = 0; i < client_count; i++){
                 if(clients[i].sin_port == cliaddr.sin_port){
@@ -114,15 +113,15 @@ int main(int argc, char **argv) {
                 }
             }
 
+            for(int i = 0 ; i < client_count ; i++){
+                Sendto(udpfd, mesg, n, 0, (struct sockaddr *) &clients[i], sizeof(clients[i]));
+            }
+
             if(in == 0){
                 clients[client_count] = cliaddr;
                 client_count++;
             }
-
-            for(int i = 0 ; i < client_count ; i++){
-                Sendto(udpfd, mesg, n, 0, (struct sockaddr *) &clients[i], len);
-            }
-
+            printf("Clientes conectados = %d\n", client_count);
         }
     }           
 }
@@ -187,6 +186,7 @@ void Setsockopt(int socket, int level, int option_name, const void *option_value
 }
 
 void Sendto(int socket, const void *message, size_t length, int flags, const struct sockaddr *dest_addr, socklen_t dest_len) {
+    
     if (sendto(socket, message, length, flags, dest_addr, dest_len) == -1) {
         perror("sendto");
         exit(1);
@@ -294,6 +294,7 @@ void sig_chld(int signo) {
 
     while ((pid = waitpid(-1, &stat, WNOHANG)) > 0) {
         printf("child %d terminated\n", pid);
+        client_count --;
     }
 
     return;
