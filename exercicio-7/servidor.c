@@ -31,15 +31,28 @@ pid_t Fork();
 void str_echo(int sockfd);
 ssize_t Writen(int fd, const void *vptr, size_t n);
 void sig_chld(int signo);
-
+void remove_newlines(char *str);
 
 typedef void Sigfunc(int);
 Sigfunc *Signal(int signo, Sigfunc *func);
 
 int client_count = 0;
 
+
+struct cliente {
+    struct sockaddr_in endereco;  // Endereço do cliente
+    char nome[10000];               // Nome do cliente
+    pid_t pid;
+};
+
+struct cliente clients[100];  // Armazena endereços dos clientes
+    
+pid_t pidAtual;
+
+int udpfd;
+
 int main(int argc, char **argv) {
-    int listenfd, connfd, udpfd, nready, maxfdp1;
+    int listenfd, connfd, nready, maxfdp1;
     char mesg[MAXLINE];
     pid_t childpid;
     fd_set rset;
@@ -50,7 +63,6 @@ int main(int argc, char **argv) {
     void sig_chld(int);
     int port_arg = atoi(argv[1]);
 
-    struct sockaddr_in clients[100];  // Armazena endereços dos clientes
 
 
     /* create listening TCP socket */
@@ -94,11 +106,13 @@ int main(int argc, char **argv) {
         if (FD_ISSET(listenfd, &rset)) {
             len = sizeof(cliaddr);
             connfd = Accept(listenfd, (struct sockaddr *) &cliaddr, &len);
-            
-            if ( (childpid = Fork()) == 0) { /* child process */
-                Close(listenfd); /* close listening socket */
-                str_echo(connfd); /* process the request */
+                
+            if ((childpid = Fork()) == 0) {  // Processo filho
+                Close(listenfd);  // Fecha o socket de escuta no filho
+                str_echo(connfd);  // Processa a requisição do cliente
                 exit(0);
+            } else{
+                pidAtual = childpid;
             }
             Close(connfd); /* parent closes connected socket */
         }
@@ -106,24 +120,86 @@ int main(int argc, char **argv) {
             len = sizeof(cliaddr);
             n = Recvfrom(udpfd, mesg, MAXLINE, 0, (struct sockaddr *) &cliaddr, &len);
 
+            char msgNova[1000];
+
+            n = snprintf(msgNova, sizeof(msgNova), "---Novo usuário conectado! %s",mesg);
+
+
+            char msg_lista_nomes[5000] = "---Lista de usuários atualmente conectados: \n";
+
+            if(client_count == 0){
+                msg_lista_nomes[0] = '\0';
+            }
+
+            for (int i = 0; i < client_count; i++) {
+                // Concatena os nomes dos clientes na string
+   
+                strncat(msg_lista_nomes, "->", sizeof(msg_lista_nomes) - strlen(msg_lista_nomes) - 1);
+                
+                strncat(msg_lista_nomes, clients[i].nome, sizeof(msg_lista_nomes) - strlen(msg_lista_nomes) - 1);
+
+                strncat(msg_lista_nomes, "\n", sizeof(msg_lista_nomes) - strlen(msg_lista_nomes) - 1);
+            }
+
+            Sendto(udpfd, msg_lista_nomes, strlen(msg_lista_nomes), 0, (struct sockaddr *)&cliaddr, sizeof(cliaddr));
+
+
             int in = 0;
-            for(int i = 0; i < client_count; i++){
-                if(clients[i].sin_port == cliaddr.sin_port){
-                    in = 1;
+            for (int i = 0; i < client_count; i++) {
+                if (clients[i].endereco.sin_port == cliaddr.sin_port &&
+                    clients[i].endereco.sin_addr.s_addr == cliaddr.sin_addr.s_addr) {
+                    in = 1; 
+                    break;
                 }
             }
 
             for(int i = 0 ; i < client_count ; i++){
-                Sendto(udpfd, mesg, n, 0, (struct sockaddr *) &clients[i], sizeof(clients[i]));
+                Sendto(udpfd, msgNova, n, 0, (struct sockaddr *) &clients[i].endereco, sizeof(clients[i].endereco));
             }
 
-            if(in == 0){
-                clients[client_count] = cliaddr;
+            if (in == 0) {
+                
+                remove_newlines(mesg);
+
+                strncpy(clients[client_count].nome, mesg, sizeof(mesg)-1);
+                clients[client_count].endereco = cliaddr;
+                clients[client_count].pid = pidAtual;
                 client_count++;
             }
             printf("Clientes conectados = %d\n", client_count);
         }
     }           
+}
+
+void sig_chld(int signo) {
+    pid_t pid;
+    int stat;
+
+    char msg[20000];
+
+    while ((pid = waitpid(-1, &stat, WNOHANG)) > 0) {
+
+        for (int i = 0; i < client_count; i++) {
+            if (clients[i].pid == pid) {
+
+                snprintf(msg, sizeof(msg), "---Cliente %s desconectado.\n", clients[i].nome);
+
+                for (int j = i; j < client_count - 1; j++) {
+                    clients[j] = clients[j + 1];
+                }
+                client_count--;
+                break;
+            }
+        }
+    }
+
+    for (int j = 0; j < client_count; j++) {
+        Sendto(udpfd, msg, strlen(msg), 0, (struct sockaddr *)&clients[j].endereco, sizeof(clients[j].endereco));
+    }
+
+    printf("Clientes conectados = %d\n", client_count);
+
+    return;
 }
 
 // Função para criar um socket e verificar erros
@@ -191,6 +267,21 @@ void Sendto(int socket, const void *message, size_t length, int flags, const str
         perror("sendto");
         exit(1);
     }
+}
+
+void remove_newlines(char *str) {
+    int i, j = 0;
+    int length = strlen(str);
+    
+    // Percorre a string original
+    for (i = 0; i < length; i++) {
+        // Se o caractere não for '\n', copia para a posição j
+        if (str[i] != '\n') {
+            str[j++] = str[i];
+        }
+    }
+    // Adiciona o caractere nulo no final da string para terminar a string corretamente
+    str[j] = '\0';
 }
 
 int Recvfrom(int socket, void *restrict buffer, size_t length, int flags, struct sockaddr *restrict address, socklen_t *restrict address_len) {
@@ -288,14 +379,3 @@ Sigfunc *Signal(int signo, Sigfunc *func) {
     return (oact.sa_handler);
 }
 
-void sig_chld(int signo) {
-    pid_t pid;
-    int stat;
-
-    while ((pid = waitpid(-1, &stat, WNOHANG)) > 0) {
-        printf("child %d terminated\n", pid);
-        client_count --;
-    }
-
-    return;
-}

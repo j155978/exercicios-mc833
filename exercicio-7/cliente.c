@@ -53,9 +53,7 @@ int main(int argc, char **argv){
     
 
 
-    // Connect UDP
-    sockUcpFd = Socket(AF_INET, SOCK_DGRAM, 0);
-    dg_cli(stdin, sockUcpFd, (struct sockaddr *) &servaddrUdp, sizeof(servaddrUdp));
+
 
 
 
@@ -69,6 +67,9 @@ int main(int argc, char **argv){
 
     connect(sockTcpFd, (struct sockaddr *)&servaddrTcp, sizeof(servaddrTcp));
 
+    // Connect UDP
+    sockUcpFd = Socket(AF_INET, SOCK_DGRAM, 0);
+    dg_cli(stdin, sockUcpFd, (struct sockaddr *) &servaddrUdp, sizeof(servaddrUdp));
     
     struct timeval timeout;
     fd_set readfds;
@@ -285,7 +286,7 @@ void dg_cli(FILE *fp, int sockfd, const struct sockaddr *pservaddr, socklen_t se
 
     Connect(sockfd, (struct sockaddr *) pservaddr, servlen);
 
-    sprintf(sendline, "Cliente novo conectado: %s\n", nome_cliente);
+    sprintf(sendline, "%s\n", nome_cliente);
 
     write(sockfd, sendline, strlen(sendline));
 
