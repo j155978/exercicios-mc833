@@ -106,7 +106,7 @@ int main(int argc, char **argv) {
         if (FD_ISSET(listenfd, &rset)) {
             len = sizeof(cliaddr);
             connfd = Accept(listenfd, (struct sockaddr *) &cliaddr, &len);
-                
+
             if ((childpid = Fork()) == 0) {  // Processo filho
                 Close(listenfd);  // Fecha o socket de escuta no filho
                 str_echo(connfd);  // Processa a requisição do cliente
@@ -273,14 +273,11 @@ void remove_newlines(char *str) {
     int i, j = 0;
     int length = strlen(str);
     
-    // Percorre a string original
     for (i = 0; i < length; i++) {
-        // Se o caractere não for '\n', copia para a posição j
         if (str[i] != '\n') {
             str[j++] = str[i];
         }
     }
-    // Adiciona o caractere nulo no final da string para terminar a string corretamente
     str[j] = '\0';
 }
 
@@ -319,15 +316,16 @@ void str_echo(int sockfd) {
     char buf[MAXLINE];
 
     again:
-        while ( (n = read(sockfd, buf, MAXLINE)) > 0)
-            Writen(sockfd, buf, n);
+    while ((n = read(sockfd, buf, MAXLINE)) > 0) {
+        Writen(sockfd, buf, n);
+    }
+
     if (n < 0 && errno == EINTR) {
         goto again;
     } else if (n < 0) {
-        perror("str_echo: read error");
+        perror("str_echo: erro na leitura");
         exit(1);
     }
-        
 }
 
 ssize_t Writen(int fd, const void *vptr, size_t n) {

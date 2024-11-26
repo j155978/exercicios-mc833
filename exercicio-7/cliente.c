@@ -78,6 +78,7 @@ int main(int argc, char **argv){
 
         FD_ZERO(&readfds);
         FD_SET(sockUcpFd, &readfds); 
+        FD_SET(sockTcpFd, &readfds);
         FD_SET(STDIN_FILENO, &readfds);
 
         timeout.tv_sec = 5;
@@ -104,6 +105,15 @@ int main(int argc, char **argv){
                     printf("Estarei enviando uma mensagem: %s", sendline);
                     send(sockTcpFd, sendline, strlen(sendline), 0);
                 }
+            }
+        }
+
+        if (FD_ISSET(sockTcpFd, &readfds)) {  // Verificando se há dados no socket TCP
+            int n = read(sockTcpFd, recvline, MAXLINE);
+            if (n > 0) {
+                recvline[n] = 0;
+                printf("Mensagem recebida: %s", recvline);
+                fflush(stdout);
             }
         }
 
