@@ -50,13 +50,6 @@ int main(int argc, char **argv){
     inet_pton(AF_INET, argv[1], &servaddrUdp.sin_addr);
 
     strcpy(nome_cliente, argv[3]);
-    
-
-
-
-
-
-
 
     // Connect TCP
     bzero(&servaddrTcp, sizeof(servaddrTcp));
